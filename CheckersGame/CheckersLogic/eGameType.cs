@@ -1,6 +1,6 @@
 ﻿namespace CheckersGameLogic
 {
-    public enum eGameMode
+    public enum eGameType
     {
         AgainstHuman = 1,
         AgainstComputer = 2

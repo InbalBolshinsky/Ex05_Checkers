@@ -8,7 +8,7 @@ namespace CheckersGameLogic
     {
         private readonly String r_PlayerName;
         private readonly ePlayerType r_PlayerType;
-        private readonly List<CheckerPiece> r_PlayerPiecesList;
+        private readonly List<Checker> r_PlayerPiecesList;
         private readonly List<Move> r_PossibleMovesList;
         private readonly List<Move> r_CaptureMovesList;
         private readonly char r_PlayerPieceSymbol;
@@ -24,7 +24,7 @@ namespace CheckersGameLogic
             this.r_PlayerKingSymbol = i_PlayerKingSymbol;
             this.m_Score = 0;
             this.m_KingsCounter = 0;
-            this.r_PlayerPiecesList = new List<CheckerPiece>();
+            this.r_PlayerPiecesList = new List<Checker>();
             this.r_PossibleMovesList = new List<Move>();
             this.r_CaptureMovesList = new List<Move>();
         }
@@ -93,7 +93,7 @@ namespace CheckersGameLogic
             }
         }
 
-        public List<CheckerPiece> PlayerPiecesList
+        public List<Checker> PlayerPiecesList
         {
             get
             {
@@ -116,21 +116,21 @@ namespace CheckersGameLogic
                 return this.r_CaptureMovesList;
             }
         }
-        
+
         public static bool IsNameValid(String i_PlayerName)
         {
             return !i_PlayerName.Contains(' ') && i_PlayerName.Length > 0 && i_PlayerName.Length <= 20;
         }
 
-        public void AddPieceToPlayerListOfPieces(CheckerPiece i_CheckerPiece)
+        public void AddPieceToPlayerListOfPieces(Checker i_CheckerPiece)
         {
             this.r_PlayerPiecesList.Add(i_CheckerPiece);
         }
 
-        public void RemovePieceFromPlayerListOfPieces(CheckerPiece i_CheckerPiece)
+        public void RemovePieceFromPlayerListOfPieces(Checker i_CheckerPiece)
         {
             this.r_PlayerPiecesList.Remove(i_CheckerPiece);
-            if(i_CheckerPiece.PieceType == ePieceType.King)
+            if (i_CheckerPiece.PieceType == eCheckerType.King)
             {
                 this.m_KingsCounter--;
             }

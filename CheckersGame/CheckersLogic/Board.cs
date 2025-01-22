@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace CheckersGameLogic
 {
-    public class GameBoard
+    public class Board
     {
         private readonly eBoardSize r_BoardSize;
-        private readonly BoardCell[,] r_Board;
+        private readonly BoardPosition[,] r_Board;
         private readonly Player r_FirstPlayer;
         private readonly Player r_SecondPlayer;
-        private readonly eGameMode r_GameMode;
+        private readonly eGameType r_GameType;
         private readonly Player[] r_PlayersReferencesArray;
         private Player m_WinnerPlayer;
         private Player m_LastPlayer;
@@ -17,13 +17,13 @@ namespace CheckersGameLogic
         private bool m_IsGameFinished;
         private const int k_KingScore = 4;
 
-        public GameBoard(eBoardSize i_BoardSize, String i_FirstPlayerName, String i_SecondPlayerName, eGameMode i_GameMode)
+        public Board(eBoardSize i_BoardSize, String i_FirstPlayerName, String i_SecondPlayerName, eGameType i_GameMode)
         {
-            this.r_GameMode = i_GameMode;
+            this.r_GameType = i_GameMode;
             this.r_BoardSize = i_BoardSize;
-            this.r_Board = new BoardCell[(int)this.r_BoardSize, (int)this.r_BoardSize];
+            this.r_Board = new BoardPosition[(int)this.r_BoardSize, (int)this.r_BoardSize];
             this.r_FirstPlayer = new Player(i_FirstPlayerName, ePlayerType.Human, 'X', 'K');
-            this.r_SecondPlayer = new Player(i_SecondPlayerName, (ePlayerType)r_GameMode, 'O', 'U');
+            this.r_SecondPlayer = new Player(i_SecondPlayerName, (ePlayerType)r_GameType, 'O', 'U');
             this.r_PlayersReferencesArray = new Player[] { r_FirstPlayer, r_SecondPlayer };
             initializeGame();
             initializeBoard();
@@ -44,7 +44,7 @@ namespace CheckersGameLogic
             int firstSeparateRowIndex = ((int)this.r_BoardSize - 2) / 2;
             int secondSeparateRowIndex = firstSeparateRowIndex + 1;
             Position currentCellPosition;
-            CheckerPiece currentCheckerPiece;
+            Checker currentCheckerPiece;
 
             for (int rowIndex = 0; rowIndex < (int)this.r_BoardSize; ++rowIndex)
             {
@@ -57,17 +57,17 @@ namespace CheckersGameLogic
                     {
                         if (rowIndex < firstSeparateRowIndex)
                         {
-                            currentCheckerPiece = new CheckerPiece(this.r_SecondPlayer, ePieceType.Regular, currentCellPosition);
+                            currentCheckerPiece = new Checker(this.r_SecondPlayer, eCheckerType.Regular, currentCellPosition);
                             r_SecondPlayer.AddPieceToPlayerListOfPieces(currentCheckerPiece);
                         }
                         else if (rowIndex > secondSeparateRowIndex)
                         {
-                            currentCheckerPiece = new CheckerPiece(this.r_FirstPlayer, ePieceType.Regular, currentCellPosition);
+                            currentCheckerPiece = new Checker(this.r_FirstPlayer, eCheckerType.Regular, currentCellPosition);
                             r_FirstPlayer.AddPieceToPlayerListOfPieces(currentCheckerPiece);
                         }
                     }
 
-                    this.r_Board[rowIndex, columnIndex] = new BoardCell(currentCellPosition, currentCheckerPiece);
+                    this.r_Board[rowIndex, columnIndex] = new BoardPosition(currentCellPosition, currentCheckerPiece);
                 }
             }
         }
@@ -145,7 +145,7 @@ namespace CheckersGameLogic
 
             if (isMoveValid(playerMove, this.CurrentPlayer))
             {
-                if(!playerMove.ShouldCapture || (playerMove.ShouldCapture && isMoveInCaptureMovesList(playerMove, this.CurrentPlayer)))
+                if (!playerMove.ShouldCapture || (playerMove.ShouldCapture && isMoveInCaptureMovesList(playerMove, this.CurrentPlayer)))
                 {
                     makeMove(playerMove);
                     isMoveSucceed = true;
@@ -161,7 +161,7 @@ namespace CheckersGameLogic
             int startPositionColumnIndex = i_PlayerMove.StartPosition.ColumnPositionOnBoard;
             int endPositionRowIndex = i_PlayerMove.EndPosition.RowPositionOnBoard;
             int endPositionColumnIndex = i_PlayerMove.EndPosition.ColumnPositionOnBoard;
-            
+
             this.r_Board[endPositionRowIndex, endPositionColumnIndex].CurrentCheckerPiece = this.r_Board[startPositionRowIndex, startPositionColumnIndex].CurrentCheckerPiece;
             this.r_Board[startPositionRowIndex, startPositionColumnIndex].Clear();
             checkIfShouldChangePieceState(this.r_Board[endPositionRowIndex, endPositionColumnIndex].CurrentCheckerPiece);
@@ -183,7 +183,7 @@ namespace CheckersGameLogic
         private bool checkIfGameEnds(Move i_LastMove)
         {
             updatePlayersPossibleAndCaptureMovesLists(i_LastMove);
-            this.m_IsGameFinished = this.OpponentPlayer.IsPiecesListEmpty() || 
+            this.m_IsGameFinished = this.OpponentPlayer.IsPiecesListEmpty() ||
                                     (this.OpponentPlayer.IsPossibleMovesListEmpty() && this.OpponentPlayer.IsCaptureMovesListEmpty());
             if (m_IsGameFinished)
             {
@@ -200,7 +200,7 @@ namespace CheckersGameLogic
                 player.ClearPossibleMovesList();
                 player.ClearCaptureMovesList();
 
-                if(player == this.CurrentPlayer && i_LastMove.ShouldCapture)
+                if (player == this.CurrentPlayer && i_LastMove.ShouldCapture)
                 {
                     updatePlayerCapturingMovesPerPiece(player, i_LastMove.EndPosition);
                 }
@@ -218,7 +218,7 @@ namespace CheckersGameLogic
 
         private void updateAllPlayerCapturingMoves(Player i_Player)
         {
-            foreach (CheckerPiece playerPiece in i_Player.PlayerPiecesList)
+            foreach (Checker playerPiece in i_Player.PlayerPiecesList)
             {
                 Position startPosition = playerPiece.CheckerPiecePosition;
                 List<Position> potentialCaptureMovesPositions = getPotentialPositions(playerPiece, startPosition, 1);
@@ -238,7 +238,7 @@ namespace CheckersGameLogic
         private void updatePlayerCapturingMovesPerPiece(Player i_Player, Position i_LastMoveEndPosition)
         {
             Position startPosition = i_LastMoveEndPosition;
-            CheckerPiece currentCheckerPiece = this.r_Board[startPosition.RowPositionOnBoard, startPosition.ColumnPositionOnBoard].CurrentCheckerPiece;
+            Checker currentCheckerPiece = this.r_Board[startPosition.RowPositionOnBoard, startPosition.ColumnPositionOnBoard].CurrentCheckerPiece;
             List<Position> potentialCaptureMovesPositions = getPotentialPositions(currentCheckerPiece, startPosition, 1);
 
             foreach (Position endPosition in potentialCaptureMovesPositions)
@@ -254,7 +254,7 @@ namespace CheckersGameLogic
 
         private void updateAllPlayerPossibleMoves(Player i_Player)
         {
-            foreach (CheckerPiece playerPiece in i_Player.PlayerPiecesList)
+            foreach (Checker playerPiece in i_Player.PlayerPiecesList)
             {
                 Position startPosition = playerPiece.CheckerPiecePosition;
                 List<Position> potentialMovesPositions = getPotentialPositions(playerPiece, startPosition, 0);
@@ -285,11 +285,11 @@ namespace CheckersGameLogic
             this.r_Board[middleRowIndex, middleColumnIndex].Clear();
         }
 
-        private List<Position> getPotentialPositions(CheckerPiece i_Piece, Position i_StartPosition, int i_Offset)
+        private List<Position> getPotentialPositions(Checker i_Piece, Position i_StartPosition, int i_Offset)
         {
             List<Position> potentialPositions = new List<Position>();
 
-            if (i_Piece.PieceType == ePieceType.King)
+            if (i_Piece.PieceType == eCheckerType.King)
             {
                 potentialPositions.Add(getLeftUpDiagonal(i_StartPosition, i_Offset));
                 potentialPositions.Add(getRightUpDiagonal(i_StartPosition, i_Offset));
@@ -315,7 +315,7 @@ namespace CheckersGameLogic
             return new Position(i_StartPosition.RowPositionOnBoard - 1 - i_Offset, i_StartPosition.ColumnPositionOnBoard - 1 - i_Offset);
         }
 
-        private Position getRightUpDiagonal (Position i_StartPosition, int i_Offset)
+        private Position getRightUpDiagonal(Position i_StartPosition, int i_Offset)
         {
             return new Position(i_StartPosition.RowPositionOnBoard - 1 - i_Offset, i_StartPosition.ColumnPositionOnBoard + 1 + i_Offset);
         }
@@ -330,18 +330,18 @@ namespace CheckersGameLogic
             return new Position(i_StartPosition.RowPositionOnBoard + 1 + i_Offset, i_StartPosition.ColumnPositionOnBoard + 1 + i_Offset);
         }
 
-        private void checkIfShouldChangePieceState(CheckerPiece i_CheckerPiece)
+        private void checkIfShouldChangePieceState(Checker i_CheckerPiece)
         {
-            if (i_CheckerPiece.PieceType != ePieceType.King)
+            if (i_CheckerPiece.PieceType != eCheckerType.King)
             {
                 if (i_CheckerPiece.OwnerPlayer == this.r_FirstPlayer && i_CheckerPiece.CheckerPiecePosition.RowPositionOnBoard == 0)
                 {
-                    i_CheckerPiece.PieceType = ePieceType.King;
+                    i_CheckerPiece.PieceType = eCheckerType.King;
                     this.r_FirstPlayer.KingsCounter++;
                 }
                 else if (i_CheckerPiece.OwnerPlayer == this.r_SecondPlayer && i_CheckerPiece.CheckerPiecePosition.RowPositionOnBoard == (int)r_BoardSize - 1)
                 {
-                    i_CheckerPiece.PieceType = ePieceType.King;
+                    i_CheckerPiece.PieceType = eCheckerType.King;
                     this.r_SecondPlayer.KingsCounter++;
                 }
             }
@@ -364,14 +364,14 @@ namespace CheckersGameLogic
             {
                 Position moveStartPosition = i_PlayerMove.StartPosition;
                 Position moveEndPosition = i_PlayerMove.EndPosition;
-                BoardCell moveStartCell = this.r_Board[moveStartPosition.RowPositionOnBoard, moveStartPosition.ColumnPositionOnBoard];
-                BoardCell moveEndCell = this.r_Board[moveEndPosition.RowPositionOnBoard, moveEndPosition.ColumnPositionOnBoard];
+                BoardPosition moveStartCell = this.r_Board[moveStartPosition.RowPositionOnBoard, moveStartPosition.ColumnPositionOnBoard];
+                BoardPosition moveEndCell = this.r_Board[moveEndPosition.RowPositionOnBoard, moveEndPosition.ColumnPositionOnBoard];
                 int columnDifference = Math.Abs(moveStartPosition.ColumnPositionOnBoard - moveEndPosition.ColumnPositionOnBoard);
                 int rowDifference;
 
                 if (!moveStartCell.IsEmpty() && moveEndCell.IsEmpty() && moveStartCell.CurrentCheckerPiece.OwnerPlayer == i_CurrentPlayer)
                 {
-                    if (moveStartCell.CurrentCheckerPiece.PieceType == ePieceType.King)
+                    if (moveStartCell.CurrentCheckerPiece.PieceType == eCheckerType.King)
                     {
                         rowDifference = Math.Abs(moveStartPosition.RowPositionOnBoard - moveEndPosition.RowPositionOnBoard);
                     }
@@ -402,7 +402,7 @@ namespace CheckersGameLogic
             Position moveEndPosition = i_PlayerMove.EndPosition;
             int middleRowIndex = (moveStartPosition.RowPositionOnBoard + moveEndPosition.RowPositionOnBoard) / 2;
             int middleColumnIndex = (moveStartPosition.ColumnPositionOnBoard + moveEndPosition.ColumnPositionOnBoard) / 2;
-            BoardCell middleCell = this.r_Board[middleRowIndex, middleColumnIndex];
+            BoardPosition middleCell = this.r_Board[middleRowIndex, middleColumnIndex];
 
             i_PlayerMove.ShouldCapture = !middleCell.IsEmpty() && middleCell.CurrentCheckerPiece.OwnerPlayer != i_CurrentPlayer;
 
@@ -413,9 +413,9 @@ namespace CheckersGameLogic
         {
             bool isMoveInList = false;
 
-            foreach(Move playerCaptureMove in i_CurrentPlayer.PlayerCaptureMovesList)
+            foreach (Move playerCaptureMove in i_CurrentPlayer.PlayerCaptureMovesList)
             {
-                isMoveInList = i_PlayerMove.StartPosition.RowPositionOnBoard == playerCaptureMove.StartPosition.RowPositionOnBoard &&  
+                isMoveInList = i_PlayerMove.StartPosition.RowPositionOnBoard == playerCaptureMove.StartPosition.RowPositionOnBoard &&
                                i_PlayerMove.StartPosition.ColumnPositionOnBoard == playerCaptureMove.StartPosition.ColumnPositionOnBoard;
 
                 if (isMoveInList)
@@ -442,15 +442,15 @@ namespace CheckersGameLogic
 
         public static bool IsSizeValid(eBoardSize i_BoardSize)
         {
-            return i_BoardSize == eBoardSize.Small || i_BoardSize == eBoardSize.Medium|| i_BoardSize == eBoardSize.Large;
+            return i_BoardSize == eBoardSize.Small || i_BoardSize == eBoardSize.Medium || i_BoardSize == eBoardSize.Large;
         }
 
-        public static bool IsGameModeValid(eGameMode i_GameMode)
+        public static bool IsGameModeValid(eGameType i_GameMode)
         {
-            return i_GameMode == eGameMode.AgainstHuman|| i_GameMode == eGameMode.AgainstComputer;
+            return i_GameMode == eGameType.AgainstHuman || i_GameMode == eGameType.AgainstComputer;
         }
 
-        public BoardCell[,] Board
+        public BoardPosition[,] GameBoard
         {
             get
             {

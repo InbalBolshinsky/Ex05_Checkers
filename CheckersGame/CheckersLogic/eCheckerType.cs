@@ -1,6 +1,6 @@
 ﻿namespace CheckersGameLogic
 {
-    public enum ePieceType
+    public enum eCheckerType
     {
         Regular,
         King,

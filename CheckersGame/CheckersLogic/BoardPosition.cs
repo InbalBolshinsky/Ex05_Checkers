@@ -1,17 +1,17 @@
 ﻿namespace CheckersGameLogic
 {
-    public class BoardCell
+    public class BoardPosition
     {
         private readonly Position r_CurrentCellPostion;
-        private CheckerPiece m_CellCheckerPiece;
+        private Checker m_CellCheckerPiece;
 
-        public BoardCell(Position i_CurrentCellPosition, CheckerPiece i_CheckerPiece)
+        public BoardPosition(Position i_CurrentCellPosition, Checker i_CheckerPiece)
         {
             this.r_CurrentCellPostion = i_CurrentCellPosition;
             this.m_CellCheckerPiece = i_CheckerPiece;
         }
 
-        public CheckerPiece CurrentCheckerPiece
+        public Checker CurrentCheckerPiece
         {
             get
             {

@@ -1,12 +1,12 @@
 ﻿namespace CheckersGameLogic
 {
-    public class CheckerPiece
+    public class Checker
     {
         private readonly Player r_OwnerPlayer;
-        private ePieceType m_PieceType;
+        private eCheckerType m_PieceType;
         private Position m_CheckerPiecePosition;
 
-        public CheckerPiece(Player i_OwnerPlayer, ePieceType i_PieceType, Position i_CheckerPiecePosition)
+        public Checker(Player i_OwnerPlayer, eCheckerType i_PieceType, Position i_CheckerPiecePosition)
         {
             this.r_OwnerPlayer = i_OwnerPlayer;
             this.m_PieceType = i_PieceType;
@@ -21,7 +21,7 @@
             }
         }
 
-        public ePieceType PieceType
+        public eCheckerType PieceType
         {
             get
             {
