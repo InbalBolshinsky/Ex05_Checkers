@@ -35,5 +35,18 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BoardPosition.cs" />
+    <Compile Include="Checker.cs" />
+    <Compile Include="eBoardSize.cs" />
+    <Compile Include="eCheckerType.cs" />
+    <Compile Include="eGameType.cs" />
+    <Compile Include="ePlayerTurn.cs" />
+    <Compile Include="ePlayerType.cs" />
+    <Compile Include="Board.cs" />
+    <Compile Include="Move.cs" />
+    <Compile Include="Player.cs" />
+    <Compile Include="Position.cs" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
