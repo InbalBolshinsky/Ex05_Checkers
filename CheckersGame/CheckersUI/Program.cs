@@ -1,5 +1,3 @@
-using CheckersGameSettings;
-
 namespace CheckersUI
 {
     internal static class Program
