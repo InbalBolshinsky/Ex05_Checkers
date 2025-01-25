@@ -20,13 +20,19 @@ namespace CheckersGameSettings
             {
                 Text = "Board Size:",
                 Location = new System.Drawing.Point(20, 20),
-                AutoSize = true
             };
 
             Label lblPlayers = new Label
             {
                 Text = "Players:",
                 Location = new System.Drawing.Point(20, 80),
+                AutoSize = truegg
+            };
+
+            Label lblPlayer1 = new Label
+            {
+                Text = "Player 1:",
+                Location = new System.Drawing.Point(20, 110),
                 AutoSize = true
             };
 
@@ -34,26 +40,29 @@ namespace CheckersGameSettings
             RadioButton rb6x6 = new RadioButton
             {
                 Text = "6 x 6",
-                Location = new System.Drawing.Point(100, 20),
+                Location = new System.Drawing.Point(20, 40),
+                AutoSize = true,
                 Checked = true
             };
 
             RadioButton rb8x8 = new RadioButton
             {
                 Text = "8 x 8",
-                Location = new System.Drawing.Point(160, 20)
+                Location = new System.Drawing.Point(120, 40),
+                AutoSize = true
             };
 
             RadioButton rb10x10 = new RadioButton
             {
                 Text = "10 x 10",
-                Location = new System.Drawing.Point(220, 20)
+                Location = new System.Drawing.Point(220, 40),
+                AutoSize = true
             };
 
             // TextBoxes
             TextBox tbPlayer1 = new TextBox
             {
-                Location = new System.Drawing.Point(100, 100),
+                Location = new System.Drawing.Point(100, 105),
                 Width = 150
             };
 
@@ -105,15 +114,16 @@ namespace CheckersGameSettings
             };
 
             // Add Controls to Form
-            this.Controls.Add(lblBoardSize);
-            this.Controls.Add(lblPlayers);
             this.Controls.Add(rb6x6);
             this.Controls.Add(rb8x8);
             this.Controls.Add(rb10x10);
+            this.Controls.Add(lblPlayers);
+            this.Controls.Add(lblPlayer1);
             this.Controls.Add(tbPlayer1);
             this.Controls.Add(tbPlayer2);
             this.Controls.Add(cbPlayer2);
             this.Controls.Add(btnDone);
         }
+
     }
 }
