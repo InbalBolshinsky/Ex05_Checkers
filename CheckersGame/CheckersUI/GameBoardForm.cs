@@ -11,22 +11,36 @@ namespace CheckersUI
         private readonly int boardSize;
         private Button[,] cellButtons; // Array to hold button references for the board cells
 
-        public GameBoardForm(string boardSizeText, string player1Name, string player2Name)
+        public GameBoardForm(string boardSizeText, string player1Name, string player2Name, bool isPlayer2Computer)
         {
             InitializeComponent();
 
-            // Parse the board size from the text (e.g., "6x6")
             boardSize = int.Parse(boardSizeText.Substring(0, 1));
+            board = new Board((eBoardSize)boardSize, player1Name, player2Name, isPlayer2Computer ? eGameType.AgainstComputer : eGameType.AgainstHuman);
 
-            // Initialize the Board logic
-            board = new Board((eBoardSize)boardSize, player1Name, player2Name, eGameType.AgainstHuman);
+            this.Text = $"Checkers Game - {player1Name} vs {(isPlayer2Computer ? "Computer" : player2Name)}";
 
-            // Set the form title
-            this.Text = $"Checkers Game - {player1Name} vs {player2Name}";
+            lblPlayer2Score.Text = isPlayer2Computer ? "Computer: 0" : $"Player 2: 0";
 
-            // Initialize the UI for the game board
             InitializeBoardUI();
         }
+
+        //public GameBoardForm(string boardSizeText, string player1Name, string player2Name)
+        //{
+        //    InitializeComponent();
+
+        //    // Parse the board size from the text (e.g., "6x6")
+        //    boardSize = int.Parse(boardSizeText.Substring(0, 1));
+
+        //    // Initialize the Board logic
+        //    board = new Board((eBoardSize)boardSize, player1Name, player2Name, eGameType.AgainstHuman);
+
+        //    // Set the form title
+        //    this.Text = $"Checkers Game - {player1Name} vs {player2Name}";
+
+        //    // Initialize the UI for the game board
+        //    InitializeBoardUI();
+        //}
 
         private void InitializeBoardUI()
         {
