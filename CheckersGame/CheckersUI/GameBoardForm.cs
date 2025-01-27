@@ -72,7 +72,14 @@ namespace CheckersUI
                     else
                     {
                         Checker checker = boardPosition.CurrentCheckerPiece;
-                        cellButton.Text = checker.OwnerPlayer == board.FirstPlayer ? "X" : "O";
+                        if (checker.PieceType == eCheckerType.King)
+                        {
+                            cellButton.Text = checker.OwnerPlayer == board.FirstPlayer ? "K" : "U";
+                        }
+                        else
+                        {
+                            cellButton.Text = checker.OwnerPlayer == board.FirstPlayer ? "X" : "O";
+                        }
                         cellButton.BackColor = checker.OwnerPlayer == board.FirstPlayer
                             ? Color.LightBlue
                             : Color.LightCoral;
@@ -104,11 +111,10 @@ namespace CheckersUI
                     }
 
                     // Attempt to move the selected piece
-                    string selectedPositionAsString = $"{selectedPosition?.RowPositionOnBoard}-{selectedPosition?.ColumnPositionOnBoard}";
-                    string clickedPositionAsString = $"{clickedPosition.RowPositionOnBoard}-{clickedPosition.ColumnPositionOnBoard}";
+                    //string selectedPositionAsString = $"{selectedPosition?.RowPositionOnBoard}-{selectedPosition?.ColumnPositionOnBoard}";
+                    //string clickedPositionAsString = $"{clickedPosition.RowPositionOnBoard}-{clickedPosition.ColumnPositionOnBoard}";
 
-
-                    if (board.TryMove(selectedPositionAsString, clickedPositionAsString))
+                    if (board.TryMove(selectedPosition, clickedPosition))
                     {
                         UpdateBoardUI(); // Update the board after a successful move
 

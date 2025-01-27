@@ -136,11 +136,16 @@ namespace CheckersGameLogic
             return computerMove;
         }
 
-        public bool TryMove(string i_StartPositionAsString, string i_EndPositionAsString)
+        public bool TryMove(Position? i_StartPosition, Position i_EndPosition)
         {
+          
             bool isMoveSucceed = false;
-            Position startPosition = convertStringToPosition(i_StartPositionAsString);
-            Position endPosition = convertStringToPosition(i_EndPositionAsString);
+            Position startPosition = i_StartPosition.Value;
+            Position endPosition = i_EndPosition;
+
+            //Position startPosition = convertStringToPosition(i_StartPositionAsString);
+            //Position endPosition = convertStringToPosition(i_EndPositionAsString);
+
             Move playerMove = new Move(startPosition, endPosition);
 
             if (isMoveValid(playerMove, this.CurrentPlayer))

@@ -17,38 +17,46 @@
 
         private void InitializeComponent()
         {
-            this.lblPlayer1Score = new Label();
-            this.lblPlayer2Score = new Label();
+            lblPlayer1Score = new Label();
+            lblPlayer2Score = new Label();
+            textBox1 = new TextBox();
+            SuspendLayout();
             // 
             // lblPlayer1Score
             // 
-            this.lblPlayer1Score.AutoSize = true;
-            this.lblPlayer1Score.Location = new System.Drawing.Point(50, 10); // Keep this position as it is
-            this.lblPlayer1Score.Name = "lblPlayer1Score";
-            this.lblPlayer1Score.Size = new System.Drawing.Size(48, 13);
-            this.lblPlayer1Score.Text = "Player 1: 0";
-
+            lblPlayer1Score.AutoSize = true;
+            lblPlayer1Score.Location = new Point(83, 19);
+            lblPlayer1Score.Margin = new Padding(5, 0, 5, 0);
+            lblPlayer1Score.Name = "lblPlayer1Score";
+            lblPlayer1Score.Size = new Size(93, 25);
+            lblPlayer1Score.TabIndex = 0;
+            lblPlayer1Score.Text = "Player 1: 0";
             // 
             // lblPlayer2Score
             // 
-            this.lblPlayer2Score.AutoSize = true;
-            // Adjust the X-coordinate to move Player 2's label closer to Player 1's label
-            this.lblPlayer2Score.Location = new System.Drawing.Point(250, 10);
-            this.lblPlayer2Score.Name = "lblPlayer2Score";
-            this.lblPlayer2Score.Size = new System.Drawing.Size(48, 13);
-            this.lblPlayer2Score.Text = "Player 2: 0";
-
+            lblPlayer2Score.AutoSize = true;
+            lblPlayer2Score.Location = new Point(417, 19);
+            lblPlayer2Score.Margin = new Padding(5, 0, 5, 0);
+            lblPlayer2Score.Name = "lblPlayer2Score";
+            lblPlayer2Score.Size = new Size(93, 25);
+            lblPlayer2Score.TabIndex = 1;
+            lblPlayer2Score.Text = "Player 2: 0";
 
             // 
             // GameBoardForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(600, 600);
-            this.Controls.Add(this.lblPlayer1Score);
-            this.Controls.Add(this.lblPlayer2Score);
-            this.Name = "GameBoardForm";
-            this.Text = "Game Board";
+            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(1000, 1050);
+            Controls.Add(lblPlayer1Score);
+            Controls.Add(lblPlayer2Score);
+            Margin = new Padding(5, 6, 5, 6);
+            Name = "GameBoardForm";
+            Text = "Game Board";
+            ResumeLayout(false);
+            PerformLayout();
         }
+
+        private TextBox textBox1;
     }
 }
