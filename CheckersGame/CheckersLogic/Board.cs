@@ -429,8 +429,8 @@ namespace CheckersGameLogic
 
         private Position convertStringToPosition(String i_PositionAsString)
         {
-            int cellRowIndex = i_PositionAsString[0] - 'A';
-            int cellColumnIndex = i_PositionAsString[1] - 'a';
+            int cellRowIndex = i_PositionAsString[0] - '0';
+            int cellColumnIndex = i_PositionAsString[2] - '0';
 
             return new Position(cellRowIndex, cellColumnIndex);
         }

@@ -67,7 +67,7 @@ namespace CheckersUI
                     if (boardPosition.IsEmpty())
                     {
                         cellButton.Text = string.Empty;
-                        cellButton.BackColor = (row + col) % 2 == 0 ? Color.White : Color.Gray;
+                        cellButton.BackColor = (row + col) % 2 == 0 ? Color.Gray : Color.White;
                     }
                     else
                     {
@@ -96,8 +96,19 @@ namespace CheckersUI
                 }
                 else
                 {
+                    // If the same piece is clicked again, deselect it
+                    if (selectedPosition.Value.Equals(clickedPosition))
+                    {
+                        DeselectChecker(); // Deselect the current checker
+                        return; // Exit early as no move needs to be processed
+                    }
+
                     // Attempt to move the selected piece
-                    if (board.TryMove(selectedPosition.ToString(), clickedPosition.ToString()))
+                    string selectedPositionAsString = $"{selectedPosition?.RowPositionOnBoard}-{selectedPosition?.ColumnPositionOnBoard}";
+                    string clickedPositionAsString = $"{clickedPosition.RowPositionOnBoard}-{clickedPosition.ColumnPositionOnBoard}";
+
+
+                    if (board.TryMove(selectedPositionAsString, clickedPositionAsString))
                     {
                         UpdateBoardUI(); // Update the board after a successful move
 
@@ -111,12 +122,38 @@ namespace CheckersUI
                     else
                     {
                         MessageBox.Show("Invalid move. Try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        DeselectChecker(); // Deselect the checker after an invalid move
                     }
-
-                    // Deselect the piece
                     selectedPosition = null;
-                    //ResetBoardColors();
                 }
+            }
+        }
+
+        private void DeselectChecker()
+        {
+            if (selectedPosition.HasValue)
+            {
+                // Get the button corresponding to the selected position
+                Position position = selectedPosition.Value;
+                Button selectedButton = cellButtons[position.RowPositionOnBoard, position.ColumnPositionOnBoard];
+
+                // Reset the button's color based on the checker owner
+                Checker checker = board.GameBoard[position.RowPositionOnBoard, position.ColumnPositionOnBoard].CurrentCheckerPiece;
+                if (checker != null)
+                {
+                    selectedButton.BackColor = checker.OwnerPlayer == board.FirstPlayer
+                        ? Color.LightBlue // First player's checker color
+                        : Color.LightCoral; // Second player's checker color
+                }
+                else
+                {
+                    // Reset to default colors if there's no checker (unlikely)
+                    selectedButton.BackColor = (position.RowPositionOnBoard + position.ColumnPositionOnBoard) % 2 == 0
+                        ? Color.Gray : Color.White;
+                }
+
+                // Deselect the position
+                selectedPosition = null;
             }
         }
 
