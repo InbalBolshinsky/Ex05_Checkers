@@ -9,70 +9,49 @@ namespace CheckersUI
     {
         private readonly Board board;
         private readonly int boardSize;
-        private Button[,] cellButtons; // Array to hold button references for the board cells
+        private Button[,] cellButtons; // 2D array to hold references to the grid buttons
+        private Position? selectedPosition; // Tracks the selected piece for movement
 
         public GameBoardForm(string boardSizeText, string player1Name, string player2Name, bool isPlayer2Computer)
         {
             InitializeComponent();
 
-            boardSize = int.Parse(boardSizeText.Substring(0, 1));
+            boardSize = int.Parse(boardSizeText.Split('x')[0]);
             board = new Board((eBoardSize)boardSize, player1Name, player2Name, isPlayer2Computer ? eGameType.AgainstComputer : eGameType.AgainstHuman);
 
             this.Text = $"Checkers Game - {player1Name} vs {(isPlayer2Computer ? "Computer" : player2Name)}";
 
-            lblPlayer2Score.Text = isPlayer2Computer ? "Computer: 0" : $"Player 2: 0";
+            lblPlayer1Score.Text = $"{player1Name}: ";
+            lblPlayer2Score.Text = isPlayer2Computer ? "Computer: 0" : $"{player2Name}: 0";
 
             InitializeBoardUI();
         }
 
-        //public GameBoardForm(string boardSizeText, string player1Name, string player2Name)
-        //{
-        //    InitializeComponent();
-
-        //    // Parse the board size from the text (e.g., "6x6")
-        //    boardSize = int.Parse(boardSizeText.Substring(0, 1));
-
-        //    // Initialize the Board logic
-        //    board = new Board((eBoardSize)boardSize, player1Name, player2Name, eGameType.AgainstHuman);
-
-        //    // Set the form title
-        //    this.Text = $"Checkers Game - {player1Name} vs {player2Name}";
-
-        //    // Initialize the UI for the game board
-        //    InitializeBoardUI();
-        //}
-
         private void InitializeBoardUI()
         {
-            int buttonSize = 50; // Size of each button representing a board cell
+            int buttonSize = 50; // Each cell's size
             cellButtons = new Button[boardSize, boardSize];
 
             for (int row = 0; row < boardSize; row++)
             {
                 for (int col = 0; col < boardSize; col++)
                 {
-                    // Create a button for each board cell
                     Button cellButton = new Button
                     {
                         Size = new Size(buttonSize, buttonSize),
                         Location = new Point(50 + col * buttonSize, 50 + row * buttonSize),
                         BackColor = (row + col) % 2 == 0 ? Color.White : Color.Gray,
                         FlatStyle = FlatStyle.Flat,
-                        Tag = new Position(row, col) // Store the cell's position in the Tag
+                        Tag = new Position(row, col)
                     };
 
-                    // Add the click event
                     cellButton.Click += OnCellButtonClick;
 
-                    // Add the button to the form
                     this.Controls.Add(cellButton);
-
-                    // Store the button in the array for later use
                     cellButtons[row, col] = cellButton;
                 }
             }
 
-            // Update the UI with the initial state of the board
             UpdateBoardUI();
         }
 
@@ -87,13 +66,11 @@ namespace CheckersUI
 
                     if (boardPosition.IsEmpty())
                     {
-                        // Empty cell
                         cellButton.Text = string.Empty;
                         cellButton.BackColor = (row + col) % 2 == 0 ? Color.White : Color.Gray;
                     }
                     else
                     {
-                        // Cell contains a checker piece
                         Checker checker = boardPosition.CurrentCheckerPiece;
                         cellButton.Text = checker.OwnerPlayer == board.FirstPlayer ? "X" : "O";
                         cellButton.BackColor = checker.OwnerPlayer == board.FirstPlayer
@@ -106,26 +83,51 @@ namespace CheckersUI
 
         private void OnCellButtonClick(object sender, EventArgs e)
         {
-            if (sender is Button clickedButton && clickedButton.Tag is Position position)
+            if (sender is Button clickedButton && clickedButton.Tag is Position clickedPosition)
             {
-                // Get the start and end positions (example, should be modified based on actual gameplay logic)
-                Position startPosition = position; // Placeholder for start position
-                Position endPosition = position;   // Placeholder for end position
-
-                if (board.TryMove(startPosition.ToString(), endPosition.ToString()))
+                if (selectedPosition == null)
                 {
-                    // After a successful move, update the board UI
-                    UpdateBoardUI();
-
-                    if (board.IsGameFinished)
+                    // Select a piece to move
+                    if (!board.GameBoard[clickedPosition.RowPositionOnBoard, clickedPosition.ColumnPositionOnBoard].IsEmpty())
                     {
-                        string winner = board.WinnerPlayer != null ? board.WinnerPlayer.PlayerName : "No one";
-                        MessageBox.Show($"{winner} wins!", "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        selectedPosition = clickedPosition;
+                        clickedButton.BackColor = Color.Yellow; // Highlight selected piece
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Invalid move. Try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // Attempt to move the selected piece
+                    if (board.TryMove(selectedPosition.ToString(), clickedPosition.ToString()))
+                    {
+                        UpdateBoardUI(); // Update the board after a successful move
+
+                        if (board.IsGameFinished)
+                        {
+                            string winner = board.WinnerPlayer != null ? board.WinnerPlayer.PlayerName : "No one";
+                            MessageBox.Show($"{winner} wins!", "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            this.Close();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Invalid move. Try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
+                    // Deselect the piece
+                    selectedPosition = null;
+                    //ResetBoardColors();
+                }
+            }
+        }
+
+        private void ResetBoardColors()
+        {
+            for (int row = 0; row < boardSize; row++)
+            {
+                for (int col = 0; col < boardSize; col++)
+                {
+                    Button cellButton = cellButtons[row, col];
+                    cellButton.BackColor = (row + col) % 2 == 0 ? Color.White : Color.Gray;
                 }
             }
         }

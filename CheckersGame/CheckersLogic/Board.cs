@@ -136,7 +136,7 @@ namespace CheckersGameLogic
             return computerMove;
         }
 
-        public bool TryMove(String i_StartPositionAsString, String i_EndPositionAsString)
+        public bool TryMove(string i_StartPositionAsString, string i_EndPositionAsString)
         {
             bool isMoveSucceed = false;
             Position startPosition = convertStringToPosition(i_StartPositionAsString);
