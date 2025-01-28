@@ -18,8 +18,8 @@ namespace CheckersUI
 
             this.Text = $"Checkers Game - {player1Name} vs {(isPlayer2Computer ? "Computer" : player2Name)}";
 
-            lblPlayer1Score.Text = $"{player1Name}: ";
-            lblPlayer2Score.Text = isPlayer2Computer ? "Computer: 0" : $"{player2Name}: 0";
+            //lblPlayer1Score.Text = $"{player1Name}: ";
+            //lblPlayer2Score.Text = isPlayer2Computer ? "Computer: 0" : $"{player2Name}: 0";
 
            InitializeBoardUI();
         }
@@ -84,6 +84,8 @@ namespace CheckersUI
                     }
                 }
             }
+            HighlightCurrentPlayer();
+            UpdatePlayerScores();
         }
 
         private void OnCellButtonClick(object? sender, EventArgs e)
@@ -134,6 +136,25 @@ namespace CheckersUI
                     selectedPosition = null;
                 }
             }
+        }
+
+        private void HighlightCurrentPlayer()
+        {
+            if (board.CurrentPlayer == board.FirstPlayer)
+            {
+                lblPlayer1Score.BackColor = Color.LightBlue;
+                lblPlayer2Score.BackColor = Color.White;
+            }
+            else
+            {
+                lblPlayer1Score.BackColor = Color.White;
+                lblPlayer2Score.BackColor = Color.LightCoral;
+            }
+
+            lblPlayer1Score.ForeColor = Color.Black;
+            lblPlayer2Score.ForeColor = Color.Black;
+            lblPlayer1Score.BorderStyle = BorderStyle.FixedSingle;
+            lblPlayer2Score.BorderStyle = BorderStyle.FixedSingle;
         }
 
         private void DeselectChecker()
@@ -211,6 +232,12 @@ namespace CheckersUI
             {
                 Application.Exit();
             }
+        }
+
+        private void UpdatePlayerScores()
+        {
+            lblPlayer1Score.Text = $"{board.FirstPlayer.PlayerName}: {board.FirstPlayer.Score}";
+            lblPlayer2Score.Text = $"{board.SecondPlayer.PlayerName}: {board.SecondPlayer.Score}";
         }
     }
 }
