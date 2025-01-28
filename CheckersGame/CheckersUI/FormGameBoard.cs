@@ -1,7 +1,4 @@
-﻿using System;
-using System.Drawing;
-using System.Windows.Forms;
-using CheckersGameLogic;
+﻿using CheckersGameLogic;
 
 namespace CheckersUI
 {
@@ -9,8 +6,8 @@ namespace CheckersUI
     {
         private readonly Board board;
         private readonly int boardSize;
-        private Button[,] cellButtons; 
-        private Position? selectedPosition; 
+        private Button[,] cellButtons;
+        private Position? selectedPosition;
 
         public FormGameBoard(string boardSizeText, string player1Name, string player2Name, bool isPlayer2Computer)
         {
@@ -24,12 +21,12 @@ namespace CheckersUI
             lblPlayer1Score.Text = $"{player1Name}: ";
             lblPlayer2Score.Text = isPlayer2Computer ? "Computer: 0" : $"{player2Name}: 0";
 
-            InitializeBoardUI();
+           InitializeBoardUI();
         }
 
         private void InitializeBoardUI()
         {
-            int buttonSize = 50; // Each cell's size
+            int buttonSize = 50;
             cellButtons = new Button[boardSize, boardSize];
 
             for (int row = 0; row < boardSize; row++)
@@ -51,7 +48,14 @@ namespace CheckersUI
                     cellButtons[row, col] = cellButton;
                 }
             }
+
             UpdateBoardUI();
+
+            // Trigger the computer's move automatically if it starts the game
+            if (board.CurrentPlayer.PlayerType == ePlayerType.Computer)
+            {
+                TriggerComputerMove();
+            }
         }
 
         private void UpdateBoardUI()
@@ -66,20 +70,17 @@ namespace CheckersUI
                     if (boardPosition.IsEmpty())
                     {
                         cellButton.Text = string.Empty;
-                        cellButton.BackColor = (row + col) % 2 == 0 ? Color.Gray : Color.White;
+                        cellButton.BackColor = (row + col) % 2 == 0 ? Color.White : Color.Gray;
                     }
                     else
                     {
                         Checker checker = boardPosition.CurrentCheckerPiece;
-                        if (checker.PieceType == eCheckerType.King)
-                        {
-                            cellButton.Text = checker.OwnerPlayer == board.FirstPlayer ? "K" : "U";
-                        }
-                        else
-                        {
-                            cellButton.Text = checker.OwnerPlayer == board.FirstPlayer ? "X" : "O";
-                        }
-                        cellButton.BackColor = (row + col) % 2 == 0 ? Color.Gray : Color.White;
+                        cellButton.Text = checker.PieceType == eCheckerType.King
+                           ? (checker.OwnerPlayer == board.FirstPlayer ? "K" : "U")
+                           : (checker.OwnerPlayer == board.FirstPlayer ? "X" : "O");
+                        cellButton.BackColor = checker.OwnerPlayer == board.FirstPlayer
+                            ? Color.LightBlue
+                            : Color.LightCoral;
                     }
                 }
             }
@@ -94,48 +95,42 @@ namespace CheckersUI
                     if (!board.GameBoard[clickedPosition.RowPositionOnBoard, clickedPosition.ColumnPositionOnBoard].IsEmpty())
                     {
                         selectedPosition = clickedPosition;
-                        clickedButton.BackColor = Color.LightBlue;
+                        clickedButton.BackColor = Color.LightYellow;
                     }
                 }
                 else
                 {
                     if (selectedPosition.HasValue &&
-                        selectedPosition?.RowPositionOnBoard == clickedPosition.RowPositionOnBoard &&
-                        selectedPosition?.ColumnPositionOnBoard == clickedPosition.ColumnPositionOnBoard)
+                        selectedPosition.Value.RowPositionOnBoard == clickedPosition.RowPositionOnBoard &&
+                        selectedPosition.Value.ColumnPositionOnBoard == clickedPosition.ColumnPositionOnBoard)
                     {
                         DeselectChecker();
                         return;
                     }
-                    if (board.TryMove(selectedPosition, clickedPosition))
+
+                    if (board.CurrentPlayer.PlayerType == ePlayerType.Human)
                     {
-                        UpdateBoardUI();
-                        if (board.IsGameFinished)
+                        if (board.TryMove(selectedPosition, clickedPosition))
                         {
-                            string message = board.WinnerPlayer != null
-                                ? $"{board.WinnerPlayer.PlayerName} Won!\nAnother Round?"
-                                : "Tie!\nAnother Round?";
+                            UpdateBoardUI();
 
-                            string title = "Damka";
-                            MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-                            MessageBoxIcon icon = MessageBoxIcon.Question;
-
-                            DialogResult result = MessageBox.Show(message, title, buttons, icon);
-
-                            if (result == DialogResult.Yes)
+                            if (!board.IsGameFinished && board.CurrentPlayer.PlayerType == ePlayerType.Computer)
                             {
-                                RestartGame(); 
-                            }
-                            else
-                            {
-                                Application.Exit(); 
+                                TriggerComputerMove();
                             }
                         }
+                        else
+                        {
+                            MessageBox.Show("Invalid move. Try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            DeselectChecker();
+                        }
                     }
-                    else
+
+                    if (board.IsGameFinished)
                     {
-                        MessageBox.Show("Invalid move. Try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        DeselectChecker();
+                        HandleGameEnd();
                     }
+
                     selectedPosition = null;
                 }
             }
@@ -147,20 +142,76 @@ namespace CheckersUI
             {
                 Position position = selectedPosition.Value;
                 Button selectedButton = cellButtons[position.RowPositionOnBoard, position.ColumnPositionOnBoard];
-
                 Checker checker = board.GameBoard[position.RowPositionOnBoard, position.ColumnPositionOnBoard].CurrentCheckerPiece;
-                selectedButton.BackColor = (position.RowPositionOnBoard + position.ColumnPositionOnBoard) % 2 == 0
-                ? Color.Gray : Color.White;
-
+                if (checker != null)
+                {
+                    selectedButton.BackColor = checker.OwnerPlayer == board.FirstPlayer
+                        ? Color.LightBlue
+                        : Color.LightCoral;
+                }
+                else
+                {
+                    // Reset to default colors if there's no checker (unlikely)
+                    selectedButton.BackColor = (position.RowPositionOnBoard + position.ColumnPositionOnBoard) % 2 == 0
+                    ? Color.Gray : Color.White;
+                }
                 selectedPosition = null;
             }
         }
 
         private void RestartGame()
-        { 
-            board.Restart();  
-            UpdateBoardUI();  
-            selectedPosition = null; 
+        {
+            board.Restart();
+            UpdateBoardUI();
+            selectedPosition = null;
+
+            // Trigger the computer's move automatically if it starts the game
+            if (board.CurrentPlayer.PlayerType == ePlayerType.Computer)
+            {
+                TriggerComputerMove();
+            }
+        }
+
+        private void TriggerComputerMove()
+        {
+            // Add a slight delay to make the AI move feel natural
+            System.Threading.Tasks.Task.Delay(500).ContinueWith(_ =>
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    board.ActivateComputerMove();
+                    UpdateBoardUI();
+
+                    // Check if the game ends after the computer's move
+                    if (board.IsGameFinished)
+                    {
+                        HandleGameEnd();
+                    }
+                });
+            });
+        }
+
+        private void HandleGameEnd()
+        {
+            string message = board.WinnerPlayer != null
+                ? $"{board.WinnerPlayer.PlayerName} Won!\nAnother Round?"
+                : "Tie!\nAnother Round?";
+
+            string title = "Damka";
+            MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+            MessageBoxIcon icon = MessageBoxIcon.Question;
+
+            DialogResult result = MessageBox.Show(message, title, buttons, icon);
+
+            if (result == DialogResult.Yes)
+            {
+                RestartGame();
+            }
+            else
+            {
+                Application.Exit();
+            }
         }
     }
 }
+
