@@ -1,6 +1,6 @@
 ﻿namespace CheckersUI
 {
-    partial class GameSettingsForm
+    partial class FormGameSettings
     {
         private System.ComponentModel.IContainer components = null;
 

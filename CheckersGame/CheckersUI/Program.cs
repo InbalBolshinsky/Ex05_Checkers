@@ -7,7 +7,7 @@ namespace CheckersUI
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new GameSettingsForm());
+            Application.Run(new FormGameSettings());
         }
     }
 }

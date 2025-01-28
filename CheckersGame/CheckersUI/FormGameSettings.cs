@@ -3,9 +3,9 @@ using System.Windows.Forms;
 
 namespace CheckersUI
 {
-    public partial class GameSettingsForm : Form
+    public partial class FormGameSettings : Form
     {
-        public GameSettingsForm()
+        public FormGameSettings()
         {
             InitializeComponent();
         }
@@ -32,7 +32,7 @@ namespace CheckersUI
             }
 
             // Open the game board form
-            var gameBoardForm = new GameBoardForm(boardSize, player1Name, player2Name, isPlayer2Computer);
+            var gameBoardForm = new FormGameBoard(boardSize, player1Name, player2Name, isPlayer2Computer);
             gameBoardForm.Show();
             this.Hide();
         }

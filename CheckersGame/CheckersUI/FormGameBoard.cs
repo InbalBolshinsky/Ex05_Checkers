@@ -5,14 +5,14 @@ using CheckersGameLogic;
 
 namespace CheckersUI
 {
-    public partial class GameBoardForm : Form
+    public partial class FormGameBoard : Form
     {
         private readonly Board board;
         private readonly int boardSize;
-        private Button[,] cellButtons; // 2D array to hold references to the grid buttons
-        private Position? selectedPosition; // Tracks the selected piece for movement
+        private Button[,] cellButtons; 
+        private Position? selectedPosition; 
 
-        public GameBoardForm(string boardSizeText, string player1Name, string player2Name, bool isPlayer2Computer)
+        public FormGameBoard(string boardSizeText, string player1Name, string player2Name, bool isPlayer2Computer)
         {
             InitializeComponent();
 
@@ -42,16 +42,15 @@ namespace CheckersUI
                         Location = new Point(50 + col * buttonSize, 50 + row * buttonSize),
                         BackColor = (row + col) % 2 == 0 ? Color.White : Color.Gray,
                         FlatStyle = FlatStyle.Flat,
-                        Tag = new Position(row, col)
+                        Tag = new Position(row, col),
+                        TabStop = false
                     };
 
                     cellButton.Click += OnCellButtonClick;
-
                     this.Controls.Add(cellButton);
                     cellButtons[row, col] = cellButton;
                 }
             }
-
             UpdateBoardUI();
         }
 
@@ -80,55 +79,62 @@ namespace CheckersUI
                         {
                             cellButton.Text = checker.OwnerPlayer == board.FirstPlayer ? "X" : "O";
                         }
-                        cellButton.BackColor = checker.OwnerPlayer == board.FirstPlayer
-                            ? Color.LightBlue
-                            : Color.LightCoral;
+                        cellButton.BackColor = (row + col) % 2 == 0 ? Color.Gray : Color.White;
                     }
                 }
             }
         }
 
-        private void OnCellButtonClick(object sender, EventArgs e)
+        private void OnCellButtonClick(object? sender, EventArgs e)
         {
             if (sender is Button clickedButton && clickedButton.Tag is Position clickedPosition)
             {
                 if (selectedPosition == null)
                 {
-                    // Select a piece to move
                     if (!board.GameBoard[clickedPosition.RowPositionOnBoard, clickedPosition.ColumnPositionOnBoard].IsEmpty())
                     {
                         selectedPosition = clickedPosition;
-                        clickedButton.BackColor = Color.Yellow; // Highlight selected piece
+                        clickedButton.BackColor = Color.LightBlue;
                     }
                 }
                 else
                 {
-                    // If the same piece is clicked again, deselect it
-                    if (selectedPosition.Value.Equals(clickedPosition))
+                    if (selectedPosition.HasValue &&
+                        selectedPosition?.RowPositionOnBoard == clickedPosition.RowPositionOnBoard &&
+                        selectedPosition?.ColumnPositionOnBoard == clickedPosition.ColumnPositionOnBoard)
                     {
-                        DeselectChecker(); // Deselect the current checker
-                        return; // Exit early as no move needs to be processed
+                        DeselectChecker();
+                        return;
                     }
-
-                    // Attempt to move the selected piece
-                    //string selectedPositionAsString = $"{selectedPosition?.RowPositionOnBoard}-{selectedPosition?.ColumnPositionOnBoard}";
-                    //string clickedPositionAsString = $"{clickedPosition.RowPositionOnBoard}-{clickedPosition.ColumnPositionOnBoard}";
-
                     if (board.TryMove(selectedPosition, clickedPosition))
                     {
-                        UpdateBoardUI(); // Update the board after a successful move
-
+                        UpdateBoardUI();
                         if (board.IsGameFinished)
                         {
-                            string winner = board.WinnerPlayer != null ? board.WinnerPlayer.PlayerName : "No one";
-                            MessageBox.Show($"{winner} wins!", "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            this.Close();
+                            string message = board.WinnerPlayer != null
+                                ? $"{board.WinnerPlayer.PlayerName} Won!\nAnother Round?"
+                                : "Tie!\nAnother Round?";
+
+                            string title = "Damka";
+                            MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                            MessageBoxIcon icon = MessageBoxIcon.Question;
+
+                            DialogResult result = MessageBox.Show(message, title, buttons, icon);
+
+                            if (result == DialogResult.Yes)
+                            {
+                                RestartGame(); 
+                            }
+                            else
+                            {
+                                Application.Exit(); 
+                            }
                         }
                     }
                     else
                     {
                         MessageBox.Show("Invalid move. Try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        DeselectChecker(); // Deselect the checker after an invalid move
+                        DeselectChecker();
                     }
                     selectedPosition = null;
                 }
@@ -139,40 +145,22 @@ namespace CheckersUI
         {
             if (selectedPosition.HasValue)
             {
-                // Get the button corresponding to the selected position
                 Position position = selectedPosition.Value;
                 Button selectedButton = cellButtons[position.RowPositionOnBoard, position.ColumnPositionOnBoard];
 
-                // Reset the button's color based on the checker owner
                 Checker checker = board.GameBoard[position.RowPositionOnBoard, position.ColumnPositionOnBoard].CurrentCheckerPiece;
-                if (checker != null)
-                {
-                    selectedButton.BackColor = checker.OwnerPlayer == board.FirstPlayer
-                        ? Color.LightBlue // First player's checker color
-                        : Color.LightCoral; // Second player's checker color
-                }
-                else
-                {
-                    // Reset to default colors if there's no checker (unlikely)
-                    selectedButton.BackColor = (position.RowPositionOnBoard + position.ColumnPositionOnBoard) % 2 == 0
-                        ? Color.Gray : Color.White;
-                }
+                selectedButton.BackColor = (position.RowPositionOnBoard + position.ColumnPositionOnBoard) % 2 == 0
+                ? Color.Gray : Color.White;
 
-                // Deselect the position
                 selectedPosition = null;
             }
         }
 
-        private void ResetBoardColors()
-        {
-            for (int row = 0; row < boardSize; row++)
-            {
-                for (int col = 0; col < boardSize; col++)
-                {
-                    Button cellButton = cellButtons[row, col];
-                    cellButton.BackColor = (row + col) % 2 == 0 ? Color.White : Color.Gray;
-                }
-            }
+        private void RestartGame()
+        { 
+            board.Restart();  
+            UpdateBoardUI();  
+            selectedPosition = null; 
         }
     }
 }

@@ -143,9 +143,6 @@ namespace CheckersGameLogic
             Position startPosition = i_StartPosition.Value;
             Position endPosition = i_EndPosition;
 
-            //Position startPosition = convertStringToPosition(i_StartPositionAsString);
-            //Position endPosition = convertStringToPosition(i_EndPositionAsString);
-
             Move playerMove = new Move(startPosition, endPosition);
 
             if (isMoveValid(playerMove, this.CurrentPlayer))

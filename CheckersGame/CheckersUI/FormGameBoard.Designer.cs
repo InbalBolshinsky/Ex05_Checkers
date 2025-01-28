@@ -1,6 +1,6 @@
 ﻿namespace CheckersUI
 {
-    partial class GameBoardForm
+    partial class FormGameBoard
     {
         private System.ComponentModel.IContainer components = null;
         private Label lblPlayer1Score;
