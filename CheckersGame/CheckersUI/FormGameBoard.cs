@@ -102,8 +102,8 @@ namespace CheckersUI
 
         private void PositionScoreLabels(int i_BoardPadding)
         {
-            lblPlayer1Score.Location = new Point(i_BoardPadding, 10);
-            lblPlayer2Score.Location = new Point(this.ClientSize.Width - lblPlayer2Score.Width - i_BoardPadding, 10);
+            m_LblPlayer1Score.Location = new Point(i_BoardPadding, 10);
+            m_LblPlayer2Score.Location = new Point(this.ClientSize.Width - m_LblPlayer2Score.Width - i_BoardPadding, 10);
         }
 
         private void UpdateBoardUI()
@@ -190,19 +190,19 @@ namespace CheckersUI
         {
             if (r_Board.CurrentPlayer == r_Board.FirstPlayer)
             {
-                lblPlayer1Score.BackColor = Color.LightBlue;
-                lblPlayer2Score.BackColor = Color.White;
+                m_LblPlayer1Score.BackColor = Color.LightBlue;
+                m_LblPlayer2Score.BackColor = Color.White;
             }
             else
             {
-                lblPlayer1Score.BackColor = Color.White;
-                lblPlayer2Score.BackColor = Color.LightCoral;
+                m_LblPlayer1Score.BackColor = Color.White;
+                m_LblPlayer2Score.BackColor = Color.LightCoral;
             }
 
-            lblPlayer1Score.ForeColor = Color.Black;
-            lblPlayer2Score.ForeColor = Color.Black;
-            lblPlayer1Score.BorderStyle = BorderStyle.FixedSingle;
-            lblPlayer2Score.BorderStyle = BorderStyle.FixedSingle;
+            m_LblPlayer1Score.ForeColor = Color.Black;
+            m_LblPlayer2Score.ForeColor = Color.Black;
+            m_LblPlayer1Score.BorderStyle = BorderStyle.FixedSingle;
+            m_LblPlayer2Score.BorderStyle = BorderStyle.FixedSingle;
         }
 
         private void DeselectChecker()
@@ -346,8 +346,8 @@ namespace CheckersUI
 
         private void UpdatePlayerScores()
         {
-            lblPlayer1Score.Text = $"{r_Board.FirstPlayer.PlayerName}: {m_FirstPlayerWins}";
-            lblPlayer2Score.Text = $"{r_Board.SecondPlayer.PlayerName}: {m_SecondPlayerWins}";
+            m_LblPlayer1Score.Text = $"{r_Board.FirstPlayer.PlayerName}: {m_FirstPlayerWins}";
+            m_LblPlayer2Score.Text = $"{r_Board.SecondPlayer.PlayerName}: {m_SecondPlayerWins}";
         }
     }
 }
