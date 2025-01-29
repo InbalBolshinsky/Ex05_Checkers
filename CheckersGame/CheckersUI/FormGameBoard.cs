@@ -1,5 +1,6 @@
 ﻿using CheckersGameLogic;
 
+
 namespace CheckersUI
 {
     public partial class FormGameBoard : Form
@@ -27,6 +28,14 @@ namespace CheckersUI
         private void InitializeBoardUI()
         {
             int buttonSize = 50;
+            int boardPadding = 50;
+            int labelHeight = 50;
+
+            int formWidth = (boardSize * buttonSize) + (2 * boardPadding);
+            int formHeight = (boardSize * buttonSize) + labelHeight + (2 * boardPadding);
+
+            this.ClientSize = new Size(formWidth, formHeight);
+
             cellButtons = new Button[boardSize, boardSize];
 
             for (int row = 0; row < boardSize; row++)
@@ -36,7 +45,7 @@ namespace CheckersUI
                     Button cellButton = new Button
                     {
                         Size = new Size(buttonSize, buttonSize),
-                        Location = new Point(50 + col * buttonSize, 50 + row * buttonSize),
+                        Location = new Point(boardPadding + col * buttonSize, boardPadding + labelHeight + row * buttonSize),
                         BackColor = (row + col) % 2 == 0 ? Color.White : Color.Gray,
                         FlatStyle = FlatStyle.Flat,
                         Tag = new Position(row, col),
@@ -49,14 +58,21 @@ namespace CheckersUI
                 }
             }
 
+            PositionScoreLabels(boardPadding);
             UpdateBoardUI();
 
-            // Trigger the computer's move automatically if it starts the game
             if (board.CurrentPlayer.PlayerType == ePlayerType.Computer)
             {
                 TriggerComputerMove();
             }
         }
+
+        private void PositionScoreLabels(int boardPadding)
+        {
+            lblPlayer1Score.Location = new Point(boardPadding, 10);
+            lblPlayer2Score.Location = new Point(this.ClientSize.Width - lblPlayer2Score.Width - boardPadding, 10);
+        }
+
 
         private void UpdateBoardUI()
         {
@@ -172,7 +188,6 @@ namespace CheckersUI
                 }
                 else
                 {
-                    // Reset to default colors if there's no checker (unlikely)
                     selectedButton.BackColor = (position.RowPositionOnBoard + position.ColumnPositionOnBoard) % 2 == 0
                     ? Color.Gray : Color.White;
                 }
@@ -186,7 +201,6 @@ namespace CheckersUI
             UpdateBoardUI();
             selectedPosition = null;
 
-            // Trigger the computer's move automatically if it starts the game
             if (board.CurrentPlayer.PlayerType == ePlayerType.Computer)
             {
                 TriggerComputerMove();
@@ -195,22 +209,34 @@ namespace CheckersUI
 
         private void TriggerComputerMove()
         {
-            // Add a slight delay to make the AI move feel natural
-            System.Threading.Tasks.Task.Delay(500).ContinueWith(_ =>
+            System.Threading.Tasks.Task.Run(() =>
             {
-                this.Invoke((MethodInvoker)delegate
+                while (!board.IsGameFinished && board.CurrentPlayer.PlayerType == ePlayerType.Computer)
                 {
-                    board.ActivateComputerMove();
-                    UpdateBoardUI();
+                    System.Threading.Tasks.Task.Delay(500).Wait(); 
 
-                    // Check if the game ends after the computer's move
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        board.ActivateComputerMove();
+                        UpdateBoardUI();
+                    });
+
                     if (board.IsGameFinished)
                     {
-                        HandleGameEnd();
+                        this.Invoke((MethodInvoker)HandleGameEnd);
+                        break;
                     }
-                });
+
+                    System.Threading.Tasks.Task.Delay(500).Wait();
+
+                    if (board.CurrentPlayer.IsCaptureMovesListEmpty())
+                    {
+                        break;
+                    }
+                }
             });
         }
+
 
         private void HandleGameEnd()
         {
