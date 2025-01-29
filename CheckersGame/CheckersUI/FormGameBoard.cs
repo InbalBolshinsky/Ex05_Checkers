@@ -1,14 +1,14 @@
 ﻿using CheckersGameLogic;
-
-
 namespace CheckersUI
 {
     public partial class FormGameBoard : Form
     {
-        private readonly Board board;
+        private readonly Board board; 
         private readonly int boardSize;
         private Button[,] cellButtons;
         private Position? selectedPosition;
+        private int firstPlayerWins = 0;
+        private int secondPlayerWins = 0;
 
         public FormGameBoard(string boardSizeText, string player1Name, string player2Name, bool isPlayer2Computer)
         {
@@ -19,11 +19,36 @@ namespace CheckersUI
 
             this.Text = $"Checkers Game - {player1Name} vs {(isPlayer2Computer ? "Computer" : player2Name)}";
 
-            //lblPlayer1Score.Text = $"{player1Name}: ";
-            //lblPlayer2Score.Text = isPlayer2Computer ? "Computer: 0" : $"{player2Name}: 0";
-
            InitializeBoardUI();
+           //SetupNearTieScenario();
         }
+
+        //private void SetupNearTieScenario()
+        //{
+        //    for (int row = 0; row < boardSize; row++)
+        //    {
+        //        for (int col = 0; col < boardSize; col++)
+        //        {
+        //            board.GameBoard[row, col].Clear(); // Empty the board
+        //        }
+        //    }
+
+        //    // Place pieces in a way that allows one last move before a tie
+        //    board.GameBoard[5, 1].CurrentCheckerPiece = new Checker(board.FirstPlayer, eCheckerType.Regular, new Position(5, 1));
+        //    board.GameBoard[5, 3].CurrentCheckerPiece = new Checker(board.FirstPlayer, eCheckerType.Regular, new Position(5, 3));
+        //    board.GameBoard[5, 5].CurrentCheckerPiece = new Checker(board.FirstPlayer, eCheckerType.Regular, new Position(5, 5));
+
+        //    board.GameBoard[4, 0].CurrentCheckerPiece = new Checker(board.SecondPlayer, eCheckerType.Regular, new Position(4, 0));
+        //    board.GameBoard[3, 1].CurrentCheckerPiece = new Checker(board.SecondPlayer, eCheckerType.Regular, new Position(3, 1));
+        //    board.GameBoard[4, 2].CurrentCheckerPiece = new Checker(board.SecondPlayer, eCheckerType.Regular, new Position(4, 2));
+        //    board.GameBoard[3, 3].CurrentCheckerPiece = new Checker(board.SecondPlayer, eCheckerType.Regular, new Position(3, 3));
+        //    board.GameBoard[4, 5].CurrentCheckerPiece = new Checker(board.SecondPlayer, eCheckerType.Regular, new Position(4, 5));
+        //    board.GameBoard[3, 5].CurrentCheckerPiece = new Checker(board.SecondPlayer, eCheckerType.Regular, new Position(3, 5));
+
+        //    // Update the UI
+        //    UpdateBoardUI();
+        //}
+
 
         private void InitializeBoardUI()
         {
@@ -237,33 +262,84 @@ namespace CheckersUI
             });
         }
 
-
         private void HandleGameEnd()
         {
-            string message = board.WinnerPlayer != null
-                ? $"{board.WinnerPlayer.PlayerName} Won!\nAnother Round?"
-                : "Tie!\nAnother Round?";
-
+            string message;
             string title = "Damka";
             MessageBoxButtons buttons = MessageBoxButtons.YesNo;
             MessageBoxIcon icon = MessageBoxIcon.Question;
 
-            DialogResult result = MessageBox.Show(message, title, buttons, icon);
+            if (board.FirstPlayer.IsPossibleMovesListEmpty() && board.SecondPlayer.IsPossibleMovesListEmpty())
+            {
+                message = "Tie! Both players have no possible moves." + Environment.NewLine + "Another Round?";
+            }
+            else if (board.SecondPlayer.IsPiecesListEmpty())
+            {
+                firstPlayerWins++;
+                message = $"{board.FirstPlayer.PlayerName} Wins! {board.SecondPlayer.PlayerName} has no pieces left." + Environment.NewLine + "Another Round?";
 
+            }
+            else if (board.FirstPlayer.IsPiecesListEmpty())
+            {
+                secondPlayerWins++;
+                message = $"{board.SecondPlayer.PlayerName} Wins! {board.FirstPlayer.PlayerName} has no pieces left." + Environment.NewLine + "Another Round?";
+
+            }
+            else if (board.FirstPlayer.IsPossibleMovesListEmpty())
+            {
+                secondPlayerWins++;
+                message = $"{board.SecondPlayer.PlayerName} Wins! {board.FirstPlayer.PlayerName} has no available moves." + Environment.NewLine + "Another Round?";
+
+            }
+            else if (board.SecondPlayer.IsPossibleMovesListEmpty())
+            {
+                firstPlayerWins++;
+                message = $"{board.FirstPlayer.PlayerName} Wins! {board.SecondPlayer.PlayerName} has no available moves." + Environment.NewLine + "Another Round?";
+            }
+            else
+            {
+                return;
+            }
+
+            DialogResult result = MessageBox.Show(message, title, buttons, icon);
             if (result == DialogResult.Yes)
             {
                 RestartGame();
             }
             else
             {
+                string finalWinner;
+                if (firstPlayerWins > secondPlayerWins)
+                {
+                    finalWinner = $"{board.FirstPlayer.PlayerName} is the overall winner!";
+                }
+                else if (secondPlayerWins > firstPlayerWins)
+                {
+                    finalWinner = $"{board.SecondPlayer.PlayerName} is the overall winner!";
+                }
+                else
+                {
+                    finalWinner = "It's a tie! Both players have the same number of wins.";
+                }
+                string finalMessage = 
+                                      $"{finalWinner}" + Environment.NewLine + $"Final Scores:" + Environment.NewLine +
+                                      $"{board.FirstPlayer.PlayerName}: {firstPlayerWins}"
+                                      + Environment.NewLine +
+                                      $"{board.SecondPlayer.PlayerName}: {secondPlayerWins}";
+                                      
+
+                MessageBox.Show(finalMessage, "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
                 Application.Exit();
             }
         }
 
+
         private void UpdatePlayerScores()
         {
-            lblPlayer1Score.Text = $"{board.FirstPlayer.PlayerName}: {board.FirstPlayer.Score}";
-            lblPlayer2Score.Text = $"{board.SecondPlayer.PlayerName}: {board.SecondPlayer.Score}";
+            //display the score incremented for each player
+            lblPlayer1Score.Text = $"{board.FirstPlayer.PlayerName}: {firstPlayerWins}";
+            lblPlayer2Score.Text = $"{board.SecondPlayer.PlayerName}: {secondPlayerWins}";
         }
     }
 }
