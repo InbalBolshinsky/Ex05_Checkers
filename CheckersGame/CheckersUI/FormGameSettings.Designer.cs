@@ -16,13 +16,13 @@
         private TextBox tbPlayer2;
         private Button btnDone;
 
-        protected override void Dispose(bool disposing)
+        protected override void Dispose(bool i_Disposing)
         {
-            if (disposing && (components != null))
+            if (i_Disposing && (components != null))
             {
                 components.Dispose();
             }
-            base.Dispose(disposing);
+            base.Dispose(i_Disposing);
         }
 
         private void InitializeComponent()

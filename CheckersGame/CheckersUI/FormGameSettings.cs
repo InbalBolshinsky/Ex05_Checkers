@@ -11,7 +11,7 @@ namespace CheckersUI
         }
 
 
-        private void btnDone_Click(object sender, EventArgs e)
+        private void btnDone_Click(object i_Sender, EventArgs i_Event)
         {
             string boardSize = rb6x6.Checked ? "6x6" : rb8x8.Checked ? "8x8" : "10x10";
             string player1Name = tbPlayer1.Text;
@@ -58,7 +58,7 @@ namespace CheckersUI
         //    this.Hide(); // Optionally hide this form
         //}
 
-        private void cbPlayer2_CheckedChanged(object sender, EventArgs e)
+        private void cbPlayer2_CheckedChanged(object i_Sender, EventArgs i_Event)
         {
             // Enable or disable the Player 2 textbox based on the checkbox state
             tbPlayer2.Enabled = cbPlayer2.Checked;
