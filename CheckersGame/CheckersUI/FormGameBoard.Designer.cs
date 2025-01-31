@@ -41,7 +41,6 @@
             m_LblPlayer2Score.Size = new Size(93, 25);
             m_LblPlayer2Score.TabIndex = 1;
             m_LblPlayer2Score.Text = "Player 2: 0";
-
             // 
             // GameBoardForm
             // 
@@ -56,7 +55,6 @@
             ResumeLayout(false);
             PerformLayout();
         }
-
         private TextBox textBox1;
     }
 }

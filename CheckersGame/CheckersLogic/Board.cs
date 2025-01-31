@@ -283,9 +283,16 @@ namespace CheckersGameLogic
             int middleRowIndex = (i_PlayerMove.StartPosition.RowPositionOnBoard + i_PlayerMove.EndPosition.RowPositionOnBoard) / 2;
             int middleColumnIndex = (i_PlayerMove.StartPosition.ColumnPositionOnBoard + i_PlayerMove.EndPosition.ColumnPositionOnBoard) / 2;
 
-            this.OpponentPlayer.RemovePieceFromPlayerListOfPieces(this.r_Board[middleRowIndex, middleColumnIndex].CurrentCheckerPiece);
+            Checker capturedChecker = this.r_Board[middleRowIndex, middleColumnIndex].CurrentCheckerPiece;
+            if (capturedChecker != null)
+            {
+                this.OpponentPlayer.CapturedPieces.Add(capturedChecker); // Store captured piece
+            }
+
+            this.OpponentPlayer.RemovePieceFromPlayerListOfPieces(capturedChecker);
             this.r_Board[middleRowIndex, middleColumnIndex].Clear();
         }
+
 
         private List<Position> getPotentialPositions(Checker i_Piece, Position i_StartPosition, int i_Offset)
         {
@@ -427,14 +434,6 @@ namespace CheckersGameLogic
             }
 
             return isMoveInList;
-        }
-
-        private Position convertStringToPosition(String i_PositionAsString)
-        {
-            int cellRowIndex = i_PositionAsString[0] - '0';
-            int cellColumnIndex = i_PositionAsString[2] - '0';
-
-            return new Position(cellRowIndex, cellColumnIndex);
         }
 
         public static bool IsNameValid(String i_PlayerName)

@@ -9,7 +9,33 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\applause.wav" />
+    <None Remove="Resources\applause.wav.wav" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\applause.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CheckersLogic\CheckersLogic.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resources\player1_king.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\player1_piece.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\player2_king.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\player2_piece.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

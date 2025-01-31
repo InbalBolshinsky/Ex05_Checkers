@@ -15,6 +15,7 @@ namespace CheckersGameLogic
         private readonly char r_PlayerKingSymbol;
         private int m_Score;
         private int m_KingsCounter;
+        public List<Checker> m_CapturedPieces = new List<Checker>();
 
         public Player(String i_PlayerName, ePlayerType i_PlayerType, char i_PlayerPieceSymbol, char i_PlayerKingSymbol)
         {
@@ -114,6 +115,18 @@ namespace CheckersGameLogic
             get
             {
                 return this.r_CaptureMovesList;
+            }
+        }
+
+        public List<Checker> CapturedPieces
+        {
+            get 
+            {
+                return m_CapturedPieces; 
+            }
+            set 
+            {
+                m_CapturedPieces = value; 
             }
         }
 

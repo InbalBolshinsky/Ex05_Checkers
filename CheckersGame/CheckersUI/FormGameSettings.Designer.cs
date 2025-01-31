@@ -3,8 +3,6 @@
     partial class FormGameSettings
     {
         private System.ComponentModel.IContainer components = null;
-
-        // UI Controls
         private Label lblBoardSize;
         private RadioButton rb6x6;
         private RadioButton rb8x8;
