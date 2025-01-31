@@ -52,7 +52,6 @@ namespace CheckersGameLogic
                 {
                     currentCellPosition = new Position(rowIndex, columnIndex);
                     currentCheckerPiece = null;
-
                     if (isAlternatingCell(rowIndex, columnIndex))
                     {
                         if (rowIndex < firstSeparateRowIndex)
@@ -65,11 +64,14 @@ namespace CheckersGameLogic
                             currentCheckerPiece = new Checker(this.r_FirstPlayer, eCheckerType.Regular, currentCellPosition);
                             r_FirstPlayer.AddPieceToPlayerListOfPieces(currentCheckerPiece);
                         }
+
                     }
 
                     this.r_Board[rowIndex, columnIndex] = new BoardPosition(currentCellPosition, currentCheckerPiece);
                 }
+
             }
+
         }
 
         private bool isAlternatingCell(int i_RowIndex, int i_ColumnIndex)
@@ -95,6 +97,7 @@ namespace CheckersGameLogic
             {
                 this.m_WinnerPlayer = null;
             }
+
         }
 
         private bool isOpponentBlocked()
@@ -132,7 +135,6 @@ namespace CheckersGameLogic
             }
 
             makeMove(computerMove);
-
             return computerMove;
         }
 
@@ -286,13 +288,12 @@ namespace CheckersGameLogic
             Checker capturedChecker = this.r_Board[middleRowIndex, middleColumnIndex].CurrentCheckerPiece;
             if (capturedChecker != null)
             {
-                this.OpponentPlayer.CapturedPieces.Add(capturedChecker); // Store captured piece
+                this.OpponentPlayer.CapturedPieces.Add(capturedChecker);
             }
 
             this.OpponentPlayer.RemovePieceFromPlayerListOfPieces(capturedChecker);
             this.r_Board[middleRowIndex, middleColumnIndex].Clear();
         }
-
 
         private List<Position> getPotentialPositions(Checker i_Piece, Position i_StartPosition, int i_Offset)
         {

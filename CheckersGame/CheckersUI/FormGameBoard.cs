@@ -1,6 +1,5 @@
 ﻿using CheckersGameLogic;
 using System.Media;
-
 namespace CheckersUI
 {
     public partial class FormGameBoard : Form
@@ -11,62 +10,23 @@ namespace CheckersUI
         private Position? m_SelectedPosition;
         private int m_FirstPlayerWins = 0;
         private int m_SecondPlayerWins = 0;
-
-        // Now these are just Panels; we’ll put them inside each player’s panel container
         private Panel m_PanelPlayer1Captured;
         private Panel m_PanelPlayer2Captured;
-
         private int m_Player1CapturedCount = 0;
         private int m_Player2CapturedCount = 0;
 
         public FormGameBoard(string i_BoardSizeText, string i_Player1Name, string i_Player2Name, bool i_IsPlayer2Computer)
         {
             InitializeComponent();
-
             r_BoardSize = int.Parse(i_BoardSizeText.Split('x')[0]);
             r_Board = new Board(
                 (eBoardSize)r_BoardSize,
                 i_Player1Name,
                 i_Player2Name,
                 i_IsPlayer2Computer ? eGameType.AgainstComputer : eGameType.AgainstHuman);
-
             this.Text = $"Checkers Game - {i_Player1Name} vs {(i_IsPlayer2Computer ? "Computer" : i_Player2Name)}";
             InitializeBoardUI();
-            //SetupNearTieScenario();
-            //r_Board.switchTurn(); // Swaps the turn to the second player
-
-            //// If the second player is a computer, trigger the AI move immediately
-            //if (r_Board.CurrentPlayer.PlayerType == ePlayerType.Computer)
-            //{
-            //    TriggerComputerMove();
-            //}
         }
-        
-
-        //private void SetupNearTieScenario()
-        //{
-        //    for (int row = 0; row < r_BoardSize; row++)
-        //    {
-        //        for (int col = 0; col < r_BoardSize; col++)
-        //        {
-        //            r_Board.GameBoard[row, col].Clear(); // Empty the board
-        //        }
-        //    }
-
-        //    // Place pieces in a way that allows one last move before a tie
-        //    r_Board.GameBoard[5, 0].CurrentCheckerPiece = new Checker(r_Board.FirstPlayer, eCheckerType.Regular, new Position(5, 0));
-        //    r_Board.GameBoard[5, 2].CurrentCheckerPiece = new Checker(r_Board.FirstPlayer, eCheckerType.Regular, new Position(5, 2));
-        //    r_Board.GameBoard[5, 4].CurrentCheckerPiece = new Checker(r_Board.FirstPlayer, eCheckerType.Regular, new Position(5, 4));
-
-        //    r_Board.GameBoard[4, 1].CurrentCheckerPiece = new Checker(r_Board.SecondPlayer, eCheckerType.Regular, new Position(4, 1));
-        //    r_Board.GameBoard[3, 0].CurrentCheckerPiece = new Checker(r_Board.SecondPlayer, eCheckerType.Regular, new Position(3, 0));
-        //    r_Board.GameBoard[4, 3].CurrentCheckerPiece = new Checker(r_Board.SecondPlayer, eCheckerType.Regular, new Position(4, 3));
-        //    r_Board.GameBoard[3, 2].CurrentCheckerPiece = new Checker(r_Board.SecondPlayer, eCheckerType.Regular, new Position(3, 2));
-        //    r_Board.GameBoard[4, 5].CurrentCheckerPiece = new Checker(r_Board.SecondPlayer, eCheckerType.Regular, new Position(4, 5));
-        //    r_Board.GameBoard[2, 5].CurrentCheckerPiece = new Checker(r_Board.SecondPlayer, eCheckerType.Regular, new Position(2, 5));
-
-        //    UpdateBoardUI();
-        //}
 
         private void InitializeBoardUI()
         {
@@ -77,10 +37,8 @@ namespace CheckersUI
                 BorderStyle = BorderStyle.FixedSingle
             };
             this.Controls.Add(panelPlayer1);
-
             m_LblPlayer1Score.Location = new Point(10, 10);
             panelPlayer1.Controls.Add(m_LblPlayer1Score);
-
             m_PanelPlayer1Captured = new Panel
             {
                 Location = new Point(m_LblPlayer1Score.Left, m_LblPlayer1Score.Bottom + 5),
@@ -119,7 +77,7 @@ namespace CheckersUI
             {
                 Size = new Size(boardWidth, boardHeight),
                 BackColor = Color.DarkGray,
-                Anchor = AnchorStyles.None 
+                Anchor = AnchorStyles.None
             };
             boardOuterPanel.Controls.Add(checkerboardPanel);
             boardOuterPanel.Resize += (s, e) =>
@@ -128,6 +86,7 @@ namespace CheckersUI
                 checkerboardPanel.Top = (boardOuterPanel.ClientSize.Height - checkerboardPanel.Height) / 2;
             };
             m_CellButtons = new Button[r_BoardSize, r_BoardSize];
+
             for (int row = 0; row < r_BoardSize; row++)
             {
                 for (int col = 0; col < r_BoardSize; col++)
@@ -157,10 +116,12 @@ namespace CheckersUI
                     m_CellButtons[row, col] = cellButton;
                 }
             }
+
             this.ClientSize = new Size(
                 panelPlayer2.Right + 20,
                 panelPlayer1.Bottom + boardHeight + 80);
             UpdateBoardUI();
+
             if (r_Board.CurrentPlayer.PlayerType == ePlayerType.Computer)
             {
                 TriggerComputerMove();
@@ -170,13 +131,16 @@ namespace CheckersUI
         private void UpdateCapturedPiecesUI()
         {
             int lostByPlayer1Count = r_Board.FirstPlayer.CapturedPieces.Count;
+
             while (m_Player1CapturedCount < lostByPlayer1Count)
             {
                 Checker newlyLostChecker = r_Board.FirstPlayer.CapturedPieces[m_Player1CapturedCount];
                 AddCapturedPieceToPanel(newlyLostChecker, m_PanelPlayer2Captured);
                 m_Player1CapturedCount++;
             }
+
             int lostByPlayer2Count = r_Board.SecondPlayer.CapturedPieces.Count;
+
             while (m_Player2CapturedCount < lostByPlayer2Count)
             {
                 Checker newlyLostChecker = r_Board.SecondPlayer.CapturedPieces[m_Player2CapturedCount];
@@ -209,16 +173,12 @@ namespace CheckersUI
                     offsetPixels = 10;
                     break;
             }
-
-            // 2) Create the PictureBox with the chosen size:
             PictureBox picBox = new PictureBox
             {
                 Size = new Size(pieceSize, pieceSize),
                 SizeMode = PictureBoxSizeMode.StretchImage,
                 BackColor = Color.Transparent
             };
-
-            // 3) Load the correct piece image (same logic you already have):
             string imageFileName =
                 i_CapturedChecker.PieceType == eCheckerType.King
                     ? (i_CapturedChecker.OwnerPlayer == r_Board.FirstPlayer
@@ -227,24 +187,18 @@ namespace CheckersUI
                     : (i_CapturedChecker.OwnerPlayer == r_Board.FirstPlayer
                         ? "player1_piece.png"
                         : "player2_piece.png");
-
             string imagePath = Path.Combine(Application.StartupPath, "Resources", imageFileName);
+
             if (File.Exists(imagePath))
             {
                 picBox.Image = Image.FromFile(imagePath);
             }
 
-            // 4) Determine the offset. Each new piece is offset by offsetPixels times the number
-            //    of existing child controls (so they fan out instead of fully overlapping).
             int index = i_TargetPanel.Controls.Count;
             int offsetX = index * offsetPixels;
             int offsetY = index * offsetPixels;
             picBox.Location = new Point(offsetX, 0);
-
-            // 5) Add it to the panel
             i_TargetPanel.Controls.Add(picBox);
-
-            // Bring the newly added piece to the top (so you see it)
             picBox.BringToFront();
         }
 
@@ -269,12 +223,14 @@ namespace CheckersUI
                         DeselectChecker();
                         return;
                     }
+
                     if (r_Board.CurrentPlayer.PlayerType == ePlayerType.Human)
                     {
                         if (r_Board.TryMove(m_SelectedPosition, clickedPosition))
                         {
                             UpdateBoardUI();
                             UpdateCapturedPiecesUI();
+
                             if (!r_Board.IsGameFinished && r_Board.CurrentPlayer.PlayerType == ePlayerType.Computer)
                             {
                                 TriggerComputerMove();
@@ -286,10 +242,12 @@ namespace CheckersUI
                             DeselectChecker();
                         }
                     }
+
                     if (r_Board.IsGameFinished)
                     {
                         HandleGameEnd();
                     }
+
                     m_SelectedPosition = null;
                 }
             }
@@ -326,7 +284,6 @@ namespace CheckersUI
                 {
                     Button cellButton = m_CellButtons[row, col];
                     BoardPosition boardPosition = r_Board.GameBoard[row, col];
-
                     if (boardPosition.IsEmpty())
                     {
                         cellButton.Text = string.Empty;
@@ -347,7 +304,6 @@ namespace CheckersUI
                                 : (checker.OwnerPlayer == r_Board.FirstPlayer
                                     ? "player1_piece.png"
                                     : "player2_piece.png"));
-
                         if (File.Exists(imagePath))
                         {
                             cellButton.BackgroundImage = Image.FromFile(imagePath);
@@ -361,6 +317,7 @@ namespace CheckersUI
                     }
                 }
             }
+
             HighlightCurrentPlayer();
             UpdatePlayerScores();
         }
@@ -391,32 +348,22 @@ namespace CheckersUI
 
         private void RestartGame()
         {
-            r_Board.Restart(); // Reset the game logic
-
-            // Clear captured pieces from the UI panels
+            r_Board.Restart();
             m_PanelPlayer1Captured.Controls.Clear();
             m_PanelPlayer2Captured.Controls.Clear();
-
-            // Reset captured piece counts
             m_Player1CapturedCount = 0;
             m_Player2CapturedCount = 0;
-
-            // Clear captured pieces from the board logic (if necessary)
             r_Board.FirstPlayer.CapturedPieces.Clear();
             r_Board.SecondPlayer.CapturedPieces.Clear();
-
-            // Refresh the UI
             UpdateBoardUI();
             UpdateCapturedPiecesUI();
             m_SelectedPosition = null;
 
-            // If it's the computer's turn, do AI move
             if (r_Board.CurrentPlayer.PlayerType == ePlayerType.Computer)
             {
                 TriggerComputerMove();
             }
         }
-
 
         private void TriggerComputerMove()
         {
@@ -432,12 +379,14 @@ namespace CheckersUI
                         UpdateBoardUI();
                         UpdateCapturedPiecesUI();
                     });
+
                     if (r_Board.IsGameFinished)
                     {
                         this.Invoke((MethodInvoker)HandleGameEnd);
                         break;
                     }
                     System.Threading.Tasks.Task.Delay(500).Wait();
+
                     if (r_Board.CurrentPlayer.IsCaptureMovesListEmpty())
                     {
                         break;
@@ -448,8 +397,6 @@ namespace CheckersUI
 
         private void HandleGameEnd()
         {
-            PlayClappingSound();
-
             string message = DisplayWinnerMessage();
             string title = "Damka";
             var result = MessageBox.Show(
@@ -458,7 +405,6 @@ namespace CheckersUI
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question
                 );
-
             m_PanelPlayer1Captured.Controls.Clear();
             m_PanelPlayer2Captured.Controls.Clear();
             m_Player1CapturedCount = 0;
@@ -482,13 +428,14 @@ namespace CheckersUI
             string path = Path.Combine(Application.StartupPath, "Resources", "applause.wav");
             SoundPlayer player = new SoundPlayer(path);
             player.Play();
-            System.Threading.Tasks.Task.Delay(2000).Wait();
+            System.Threading.Tasks.Task.Delay(1800).Wait();
             player.Stop();
         }
 
         private string DisplayWinnerMessage()
         {
             string message = "";
+
             if (r_Board.FirstPlayer.IsPossibleMovesListEmpty() && r_Board.SecondPlayer.IsPossibleMovesListEmpty())
             {
                 message = "Tie! The game is over." + Environment.NewLine + "Another Round?";
@@ -522,13 +469,14 @@ namespace CheckersUI
                           + "Another Round?";
             }
 
-            PlayClappingSound();
             return message;
         }
 
         private void DisplayFinalWinnerMessage()
         {
+            PlayClappingSound();
             string finalWinner;
+
             if (m_FirstPlayerWins > m_SecondPlayerWins)
             {
                 finalWinner = $"{r_Board.FirstPlayer.PlayerName} is the overall winner!";
@@ -546,8 +494,57 @@ namespace CheckersUI
                 $"{finalWinner}\nFinal Scores:\n"
                 + $"{r_Board.FirstPlayer.PlayerName}: {m_FirstPlayerWins}\n"
                 + $"{r_Board.SecondPlayer.PlayerName}: {m_SecondPlayerWins}";
+            string imagePath = Path.Combine(
+                            Application.StartupPath,
+                            "Resources", "trophy.png");
 
-            MessageBox.Show(finalMessage, "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (!File.Exists(imagePath))
+            {
+                MessageBox.Show($"Missing image file: {imagePath}", "Error",
+                   MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            Form msgForm = new Form()
+            {
+                Text = "Game Over",
+                Size = new Size(400, 200),
+                StartPosition = FormStartPosition.CenterScreen,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                MaximizeBox = false,
+                MinimizeBox = false
+            };
+
+            PictureBox pictureBox = new PictureBox();
+
+            try
+            {
+                pictureBox.Image = Image.FromFile(imagePath);
+            }
+            catch
+            {
+                pictureBox.Image = SystemIcons.Information.ToBitmap();
+            }
+
+            pictureBox.Size = new Size(50, 50);
+            pictureBox.Location = new Point(10, 20);
+            pictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
+            Label messageLabel = new Label()
+            {
+                Text = finalMessage,
+                Location = new Point(70, 20),
+                Size = new Size(300, 80),
+                Font = new Font("Arial", 10)
+            };
+            Button okButton = new Button()
+            {
+                Text = "OK",
+                Location = new Point(150, 120),
+                DialogResult = DialogResult.OK
+            };
+            msgForm.Controls.Add(pictureBox);
+            msgForm.Controls.Add(messageLabel);
+            msgForm.Controls.Add(okButton);
+            msgForm.AcceptButton = okButton;
+            msgForm.ShowDialog();
         }
     }
 }

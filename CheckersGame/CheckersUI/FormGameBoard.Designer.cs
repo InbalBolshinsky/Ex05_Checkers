@@ -17,44 +17,45 @@
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormGameBoard));
             m_LblPlayer1Score = new Label();
             m_LblPlayer2Score = new Label();
-            textBox1 = new TextBox();
             SuspendLayout();
             // 
-            // lblPlayer1Score
+            // m_LblPlayer1Score
             // 
             m_LblPlayer1Score.AutoSize = true;
             m_LblPlayer1Score.Location = new Point(83, 19);
             m_LblPlayer1Score.Margin = new Padding(5, 0, 5, 0);
-            m_LblPlayer1Score.Name = "lblPlayer1Score";
+            m_LblPlayer1Score.Name = "m_LblPlayer1Score";
             m_LblPlayer1Score.Size = new Size(93, 25);
             m_LblPlayer1Score.TabIndex = 0;
             m_LblPlayer1Score.Text = "Player 1: 0";
             // 
-            // lblPlayer2Score
+            // m_LblPlayer2Score
             // 
             m_LblPlayer2Score.AutoSize = true;
             m_LblPlayer2Score.Location = new Point(417, 19);
             m_LblPlayer2Score.Margin = new Padding(5, 0, 5, 0);
-            m_LblPlayer2Score.Name = "lblPlayer2Score";
+            m_LblPlayer2Score.Name = "m_LblPlayer2Score";
             m_LblPlayer2Score.Size = new Size(93, 25);
             m_LblPlayer2Score.TabIndex = 1;
             m_LblPlayer2Score.Text = "Player 2: 0";
             // 
-            // GameBoardForm
+            // FormGameBoard
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = SystemColors.Menu;
             ClientSize = new Size(1000, 1050);
             Controls.Add(m_LblPlayer1Score);
             Controls.Add(m_LblPlayer2Score);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(5, 6, 5, 6);
-            Name = "GameBoardForm";
+            Name = "FormGameBoard";
             Text = "Game Board";
             ResumeLayout(false);
             PerformLayout();
         }
-        private TextBox textBox1;
     }
 }
