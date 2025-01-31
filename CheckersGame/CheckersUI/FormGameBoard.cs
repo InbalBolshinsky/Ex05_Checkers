@@ -33,18 +33,43 @@ namespace CheckersUI
             this.Text = $"Checkers Game - {i_Player1Name} vs {(i_IsPlayer2Computer ? "Computer" : i_Player2Name)}";
             InitializeBoardUI();
             //SetupNearTieScenario();
+            //r_Board.switchTurn(); // Swaps the turn to the second player
+
+            //// If the second player is a computer, trigger the AI move immediately
+            //if (r_Board.CurrentPlayer.PlayerType == ePlayerType.Computer)
+            //{
+            //    TriggerComputerMove();
+            //}
         }
+        
+
+        //private void SetupNearTieScenario()
+        //{
+        //    for (int row = 0; row < r_BoardSize; row++)
+        //    {
+        //        for (int col = 0; col < r_BoardSize; col++)
+        //        {
+        //            r_Board.GameBoard[row, col].Clear(); // Empty the board
+        //        }
+        //    }
+
+        //    // Place pieces in a way that allows one last move before a tie
+        //    r_Board.GameBoard[5, 0].CurrentCheckerPiece = new Checker(r_Board.FirstPlayer, eCheckerType.Regular, new Position(5, 0));
+        //    r_Board.GameBoard[5, 2].CurrentCheckerPiece = new Checker(r_Board.FirstPlayer, eCheckerType.Regular, new Position(5, 2));
+        //    r_Board.GameBoard[5, 4].CurrentCheckerPiece = new Checker(r_Board.FirstPlayer, eCheckerType.Regular, new Position(5, 4));
+
+        //    r_Board.GameBoard[4, 1].CurrentCheckerPiece = new Checker(r_Board.SecondPlayer, eCheckerType.Regular, new Position(4, 1));
+        //    r_Board.GameBoard[3, 0].CurrentCheckerPiece = new Checker(r_Board.SecondPlayer, eCheckerType.Regular, new Position(3, 0));
+        //    r_Board.GameBoard[4, 3].CurrentCheckerPiece = new Checker(r_Board.SecondPlayer, eCheckerType.Regular, new Position(4, 3));
+        //    r_Board.GameBoard[3, 2].CurrentCheckerPiece = new Checker(r_Board.SecondPlayer, eCheckerType.Regular, new Position(3, 2));
+        //    r_Board.GameBoard[4, 5].CurrentCheckerPiece = new Checker(r_Board.SecondPlayer, eCheckerType.Regular, new Position(4, 5));
+        //    r_Board.GameBoard[2, 5].CurrentCheckerPiece = new Checker(r_Board.SecondPlayer, eCheckerType.Regular, new Position(2, 5));
+
+        //    UpdateBoardUI();
+        //}
 
         private void InitializeBoardUI()
         {
-            // ---------------------------------------------------------------------
-            // 1) Create two "player info" panels at the top (one for each player).
-            //    Each contains:
-            //      - The player's label (m_LblPlayerXScore).
-            //      - A small panel to hold captured pieces (m_PanelPlayerXCaptured).
-            // ---------------------------------------------------------------------
-
-            // Player 1 Panel
             Panel panelPlayer1 = new Panel
             {
                 Location = new Point(10, 10),
@@ -53,61 +78,56 @@ namespace CheckersUI
             };
             this.Controls.Add(panelPlayer1);
 
-            // Place the Player1 label inside panelPlayer1
-            // (The label is created in the Designer; we just position it.)
             m_LblPlayer1Score.Location = new Point(10, 10);
             panelPlayer1.Controls.Add(m_LblPlayer1Score);
 
-            // Create a panel for captured pieces below the label
             m_PanelPlayer1Captured = new Panel
             {
                 Location = new Point(m_LblPlayer1Score.Left, m_LblPlayer1Score.Bottom + 5),
                 Size = new Size(280, 30),
-                AutoScroll = true,
-                BorderStyle = BorderStyle.None
+                AutoScroll = true
             };
             panelPlayer1.Controls.Add(m_PanelPlayer1Captured);
-
-            // Player 2 Panel
             Panel panelPlayer2 = new Panel
             {
-                Location = new Point(320, 10), // offset from player1
+                Location = new Point(panelPlayer1.Right + 10, 10),
                 Size = new Size(300, 80),
                 BorderStyle = BorderStyle.FixedSingle
             };
             this.Controls.Add(panelPlayer2);
-
-            // Place the Player2 label inside panelPlayer2
             m_LblPlayer2Score.Location = new Point(10, 10);
             panelPlayer2.Controls.Add(m_LblPlayer2Score);
-
-            // Create a panel for captured pieces below the label
             m_PanelPlayer2Captured = new Panel
             {
                 Location = new Point(m_LblPlayer2Score.Left, m_LblPlayer2Score.Bottom + 5),
                 Size = new Size(280, 30),
-                AutoScroll = true,
-                BorderStyle = BorderStyle.None
+                AutoScroll = true
             };
             panelPlayer2.Controls.Add(m_PanelPlayer2Captured);
-
-            // ---------------------------------------------------
-            // 2) Create the checkers board (buttons) below the top panels
-            //    We’ll place it at (10, panelPlayer1.Bottom + 20).
-            //    You can also compute a dynamic size for the form, etc.
-            // ---------------------------------------------------
+            Panel boardOuterPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                BackColor = Color.LightGray
+            };
+            boardOuterPanel.SendToBack();
+            this.Controls.Add(boardOuterPanel);
             int buttonSize = 50;
             int boardPadding = 10;
-            // We'll put it further down from the top panels:
-            int boardTop = panelPlayer1.Bottom + 20; // or panelPlayer2, same height
-
-            // Optionally, you can keep the old logic to define form size:
-            // int formWidth = ...
-            // int formHeight = ...
-            // this.ClientSize = new Size(formWidth, formHeight);
-
+            int boardWidth = (buttonSize * r_BoardSize) + (2 * boardPadding);
+            int boardHeight = (buttonSize * r_BoardSize) + (2 * boardPadding);
+            Panel checkerboardPanel = new Panel
+            {
+                Size = new Size(boardWidth, boardHeight),
+                BackColor = Color.DarkGray,
+                Anchor = AnchorStyles.None 
+            };
+            boardOuterPanel.Controls.Add(checkerboardPanel);
+            boardOuterPanel.Resize += (s, e) =>
+            {
+                checkerboardPanel.Left = (boardOuterPanel.ClientSize.Width - checkerboardPanel.Width) / 2;
+                checkerboardPanel.Top = (boardOuterPanel.ClientSize.Height - checkerboardPanel.Height) / 2;
+            };
             m_CellButtons = new Button[r_BoardSize, r_BoardSize];
-
             for (int row = 0; row < r_BoardSize; row++)
             {
                 for (int col = 0; col < r_BoardSize; col++)
@@ -117,7 +137,7 @@ namespace CheckersUI
                         Size = new Size(buttonSize, buttonSize),
                         Location = new Point(
                             boardPadding + col * buttonSize,
-                            boardTop + row * buttonSize),
+                            boardPadding + row * buttonSize),
                         BackColor = (row + col) % 2 == 0 ? Color.White : Color.Gray,
                         FlatStyle = FlatStyle.Flat,
                         Tag = new Position(row, col),
@@ -132,48 +152,41 @@ namespace CheckersUI
                     {
                         cellButton.Click += cellButton_Click;
                     }
-                    this.Controls.Add(cellButton);
+
+                    checkerboardPanel.Controls.Add(cellButton);
                     m_CellButtons[row, col] = cellButton;
                 }
             }
-
-            // 3) Finally, update the UI to reflect board state.
+            this.ClientSize = new Size(
+                panelPlayer2.Right + 20,
+                panelPlayer1.Bottom + boardHeight + 80);
             UpdateBoardUI();
-
-            // If it's the computer's turn, trigger AI.
             if (r_Board.CurrentPlayer.PlayerType == ePlayerType.Computer)
             {
                 TriggerComputerMove();
             }
         }
 
-        // -------------------------------------------------------------------------
-        // The rest of your existing logic remains the same, except that we removed
-        // PositionScoreLabels(...) and references to it.
-        // -------------------------------------------------------------------------
-
         private void UpdateCapturedPiecesUI()
         {
-            int player1TotalCaptured = r_Board.FirstPlayer.CapturedPieces.Count;
-            while (m_Player1CapturedCount < player1TotalCaptured)
+            int lostByPlayer1Count = r_Board.FirstPlayer.CapturedPieces.Count;
+            while (m_Player1CapturedCount < lostByPlayer1Count)
             {
-                Checker newlyCapturedChecker = r_Board.FirstPlayer.CapturedPieces[m_Player1CapturedCount];
-                AddCapturedPieceToPanel(newlyCapturedChecker, m_PanelPlayer1Captured);
+                Checker newlyLostChecker = r_Board.FirstPlayer.CapturedPieces[m_Player1CapturedCount];
+                AddCapturedPieceToPanel(newlyLostChecker, m_PanelPlayer2Captured);
                 m_Player1CapturedCount++;
             }
-
-            int player2TotalCaptured = r_Board.SecondPlayer.CapturedPieces.Count;
-            while (m_Player2CapturedCount < player2TotalCaptured)
+            int lostByPlayer2Count = r_Board.SecondPlayer.CapturedPieces.Count;
+            while (m_Player2CapturedCount < lostByPlayer2Count)
             {
-                Checker newlyCapturedChecker = r_Board.SecondPlayer.CapturedPieces[m_Player2CapturedCount];
-                AddCapturedPieceToPanel(newlyCapturedChecker, m_PanelPlayer2Captured);
+                Checker newlyLostChecker = r_Board.SecondPlayer.CapturedPieces[m_Player2CapturedCount];
+                AddCapturedPieceToPanel(newlyLostChecker, m_PanelPlayer1Captured);
                 m_Player2CapturedCount++;
             }
         }
 
         private void AddCapturedPieceToPanel(Checker i_CapturedChecker, Panel i_TargetPanel)
         {
-            // 1) Decide pieceSize and offsetPixels based on the board size:
             int pieceSize;
             int offsetPixels;
 
@@ -201,7 +214,8 @@ namespace CheckersUI
             PictureBox picBox = new PictureBox
             {
                 Size = new Size(pieceSize, pieceSize),
-                SizeMode = PictureBoxSizeMode.StretchImage
+                SizeMode = PictureBoxSizeMode.StretchImage,
+                BackColor = Color.Transparent
             };
 
             // 3) Load the correct piece image (same logic you already have):
@@ -377,16 +391,32 @@ namespace CheckersUI
 
         private void RestartGame()
         {
-            r_Board.Restart();
+            r_Board.Restart(); // Reset the game logic
+
+            // Clear captured pieces from the UI panels
+            m_PanelPlayer1Captured.Controls.Clear();
+            m_PanelPlayer2Captured.Controls.Clear();
+
+            // Reset captured piece counts
+            m_Player1CapturedCount = 0;
+            m_Player2CapturedCount = 0;
+
+            // Clear captured pieces from the board logic (if necessary)
+            r_Board.FirstPlayer.CapturedPieces.Clear();
+            r_Board.SecondPlayer.CapturedPieces.Clear();
+
+            // Refresh the UI
             UpdateBoardUI();
             UpdateCapturedPiecesUI();
             m_SelectedPosition = null;
 
+            // If it's the computer's turn, do AI move
             if (r_Board.CurrentPlayer.PlayerType == ePlayerType.Computer)
             {
                 TriggerComputerMove();
             }
         }
+
 
         private void TriggerComputerMove()
         {
@@ -426,7 +456,15 @@ namespace CheckersUI
                 message,
                 title,
                 MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
+                MessageBoxIcon.Question
+                );
+
+            m_PanelPlayer1Captured.Controls.Clear();
+            m_PanelPlayer2Captured.Controls.Clear();
+            m_Player1CapturedCount = 0;
+            m_Player2CapturedCount = 0;
+            r_Board.FirstPlayer.CapturedPieces.Clear();
+            r_Board.SecondPlayer.CapturedPieces.Clear();
 
             if (result == DialogResult.Yes)
             {
@@ -451,7 +489,11 @@ namespace CheckersUI
         private string DisplayWinnerMessage()
         {
             string message = "";
-            if (r_Board.SecondPlayer.IsPiecesListEmpty())
+            if (r_Board.FirstPlayer.IsPossibleMovesListEmpty() && r_Board.SecondPlayer.IsPossibleMovesListEmpty())
+            {
+                message = "Tie! The game is over." + Environment.NewLine + "Another Round?";
+            }
+            else if (r_Board.SecondPlayer.IsPiecesListEmpty())
             {
                 m_FirstPlayerWins++;
                 message = $"{r_Board.FirstPlayer.PlayerName} Wins! {r_Board.SecondPlayer.PlayerName} has no pieces left."
