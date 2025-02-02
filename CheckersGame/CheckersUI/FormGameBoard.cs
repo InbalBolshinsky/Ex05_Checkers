@@ -68,9 +68,38 @@ namespace CheckersUI
             initializeCheckerboard(checkerboardPanel, buttonSize, boardPadding);
             ClientSize = new Size(panelPlayer2.Right + 20, panelPlayer1.Bottom + boardHeight + 80);
             updateBoardUI();
+
             if (r_Board.CurrentPlayer.PlayerType == ePlayerType.Computer)
             {
                 triggerComputerMove();
+            }
+        }
+
+        private void disablePlayerButtons()
+        {
+            for (int row = 0; row < r_BoardSize; row++)
+            {
+                for (int col = 0; col < r_BoardSize; col++)
+                {
+                    if (r_Board.GameBoard[row, col].CurrentCheckerPiece?.OwnerPlayer == r_Board.FirstPlayer)
+                    {
+                        m_CellButtons[row, col].Enabled = false;
+                    }
+                }
+            }
+        }
+
+        private void enablePlayerButtons()
+        {
+            for (int row = 0; row < r_BoardSize; row++)
+            {
+                for (int col = 0; col < r_BoardSize; col++)
+                {
+                    if (r_Board.GameBoard[row, col].CurrentCheckerPiece?.OwnerPlayer == r_Board.FirstPlayer)
+                    {
+                        m_CellButtons[row, col].Enabled = true;
+                    }
+                }
             }
         }
 
@@ -279,21 +308,10 @@ namespace CheckersUI
             {
                 Position position = m_SelectedPosition.Value;
                 Button selectedButton = m_CellButtons[position.RowPositionOnBoard, position.ColumnPositionOnBoard];
-                Checker checker = r_Board.GameBoard[position.RowPositionOnBoard, position.ColumnPositionOnBoard].CurrentCheckerPiece;
 
-                if (checker != null)
-                {
-                    selectedButton.BackColor = checker.OwnerPlayer == r_Board.FirstPlayer
-                        ? Color.LightBlue
-                        : Color.LightCoral;
-                }
-                else
-                {
-                    selectedButton.BackColor = (position.RowPositionOnBoard + position.ColumnPositionOnBoard) % 2 == 0
-                        ? Color.Gray
-                        : Color.White;
-                }
-
+                selectedButton.BackColor = (position.RowPositionOnBoard + position.ColumnPositionOnBoard) % 2 == 0
+                    ? Color.White
+                    : Color.Gray;
                 m_SelectedPosition = null;
             }
         }
@@ -318,14 +336,19 @@ namespace CheckersUI
             BoardPosition boardPosition;
 
             cellButton = m_CellButtons[i_Row, i_Col];
-            boardPosition = r_Board.GameBoard[i_Row,i_Col];
+            boardPosition = r_Board.GameBoard[i_Row, i_Col];
             if (boardPosition.IsEmpty())
             {
-                resetCell(cellButton, i_Row,i_Col);
+                resetCell(cellButton, i_Row, i_Col);
             }
             else
             {
                 updateCellWithChecker(cellButton, boardPosition.CurrentCheckerPiece);
+            }
+
+            if ((i_Row + i_Col) % 2 != 0)
+            {
+                cellButton.Enabled = true;
             }
         }
 
@@ -415,32 +438,40 @@ namespace CheckersUI
 
         private void triggerComputerMove()
         {
-            System.Threading.Tasks.Task.Run(() =>
+            disablePlayerButtons();
+            System.Windows.Forms.Timer computerMoveTimer = new System.Windows.Forms.Timer();
+            computerMoveTimer.Interval = 500;
+            computerMoveTimer.Tick += (s, e) =>
             {
-                while (!r_Board.IsGameFinished && r_Board.CurrentPlayer.PlayerType == ePlayerType.Computer)
+                if (!r_Board.IsGameFinished && r_Board.CurrentPlayer.PlayerType == ePlayerType.Computer)
                 {
-                    System.Threading.Tasks.Task.Delay(500).Wait();
-                    this.Invoke((MethodInvoker)delegate
-                    {
-                        r_Board.ExecuteComputerMove();
-                        updateBoardUI();
-                        updateCapturedPiecesUI();
-                    });
-
+                    r_Board.ExecuteComputerMove();
+                    updateBoardUI();
+                    updateCapturedPiecesUI();
                     if (r_Board.IsGameFinished)
                     {
-                        this.Invoke((MethodInvoker)handleGameEnd);
-                        break;
+                        computerMoveTimer.Stop();
+                        handleGameEnd();
+                        enablePlayerButtons();
+                        return;
                     }
 
-                    System.Threading.Tasks.Task.Delay(500).Wait();
                     if (r_Board.CurrentPlayer.IsCaptureMovesListEmpty())
                     {
-                        break;
+                        computerMoveTimer.Stop();
+                        enablePlayerButtons();
                     }
                 }
-            });
+                else
+                {
+                    computerMoveTimer.Stop();
+                    enablePlayerButtons();
+                }
+            };
+
+            computerMoveTimer.Start();
         }
+
 
         private void handleGameEnd()
         {
