@@ -75,7 +75,7 @@ namespace CheckersUI
             }
         }
 
-        private void disablePlayerButtons()
+        private void switchPlayerButtons(bool i_State)
         {
             for (int row = 0; row < r_BoardSize; row++)
             {
@@ -83,21 +83,14 @@ namespace CheckersUI
                 {
                     if (r_Board.GameBoard[row, col].CurrentCheckerPiece?.OwnerPlayer == r_Board.FirstPlayer)
                     {
-                        m_CellButtons[row, col].Enabled = false;
-                    }
-                }
-            }
-        }
-
-        private void enablePlayerButtons()
-        {
-            for (int row = 0; row < r_BoardSize; row++)
-            {
-                for (int col = 0; col < r_BoardSize; col++)
-                {
-                    if (r_Board.GameBoard[row, col].CurrentCheckerPiece?.OwnerPlayer == r_Board.FirstPlayer)
-                    {
-                        m_CellButtons[row, col].Enabled = true;
+                        if (i_State == true)
+                        {
+                            m_CellButtons[row, col].Enabled = true;
+                        }
+                        else
+                        {
+                            m_CellButtons[row, col].Enabled = false;
+                        }
                     }
                 }
             }
@@ -438,7 +431,8 @@ namespace CheckersUI
 
         private void triggerComputerMove()
         {
-            disablePlayerButtons();
+            bool state = true;
+            switchPlayerButtons(!state);
             System.Windows.Forms.Timer computerMoveTimer = new System.Windows.Forms.Timer();
             computerMoveTimer.Interval = 500;
             computerMoveTimer.Tick += (s, e) =>
@@ -452,20 +446,20 @@ namespace CheckersUI
                     {
                         computerMoveTimer.Stop();
                         handleGameEnd();
-                        enablePlayerButtons();
+                        switchPlayerButtons(true);
                         return;
                     }
 
                     if (r_Board.CurrentPlayer.IsCaptureMovesListEmpty())
                     {
                         computerMoveTimer.Stop();
-                        enablePlayerButtons();
+                        switchPlayerButtons(true);
                     }
                 }
                 else
                 {
                     computerMoveTimer.Stop();
-                    enablePlayerButtons();
+                    switchPlayerButtons(true);
                 }
             };
 
