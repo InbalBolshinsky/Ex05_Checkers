@@ -15,7 +15,7 @@
             base.Dispose(i_Disposing);
         }
 
-        private void InitializeComponent()
+        private void initializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormGameBoard));
             m_LblPlayer1Score = new Label();

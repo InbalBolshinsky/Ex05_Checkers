@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-
 namespace CheckersGameLogic
 {
     public class Board
@@ -10,11 +9,11 @@ namespace CheckersGameLogic
         private readonly Player r_FirstPlayer;
         private readonly Player r_SecondPlayer;
         private readonly eGameType r_GameType;
-        private readonly Player[] r_PlayersReferencesArray;
-        private Player m_WinnerPlayer;
+        private readonly Player[] r_PlayerReferences;
+        private Player m_Winner;
         private Player m_LastPlayer;
         private ePlayerTurn m_PlayerTurn;
-        private bool m_IsGameFinished;
+        private bool m_IsGameOver;
         private const int k_KingScore = 4;
 
         public Board(eBoardSize i_BoardSize, String i_FirstPlayerName, String i_SecondPlayerName, eGameType i_GameMode)
@@ -24,7 +23,7 @@ namespace CheckersGameLogic
             this.r_Board = new BoardPosition[(int)this.r_BoardSize, (int)this.r_BoardSize];
             this.r_FirstPlayer = new Player(i_FirstPlayerName, ePlayerType.Human, 'X', 'K');
             this.r_SecondPlayer = new Player(i_SecondPlayerName, (ePlayerType)r_GameType, 'O', 'U');
-            this.r_PlayersReferencesArray = new Player[] { r_FirstPlayer, r_SecondPlayer };
+            this.r_PlayerReferences = new Player[] { r_FirstPlayer, r_SecondPlayer };
             initializeGame();
             initializeBoard();
         }
@@ -33,8 +32,8 @@ namespace CheckersGameLogic
         {
             this.m_PlayerTurn = ePlayerTurn.Player1;
             this.m_LastPlayer = this.r_FirstPlayer;
-            this.m_IsGameFinished = false;
-            this.m_WinnerPlayer = null;
+            this.m_IsGameOver = false;
+            this.m_Winner = null;
             this.r_FirstPlayer.InitializePlayer();
             this.r_SecondPlayer.InitializePlayer();
         }
@@ -52,7 +51,7 @@ namespace CheckersGameLogic
                 {
                     currentCellPosition = new Position(rowIndex, columnIndex);
                     currentCheckerPiece = null;
-                    if (isAlternatingCell(rowIndex, columnIndex))
+                    if (isCheckerCell(rowIndex, columnIndex))
                     {
                         if (rowIndex < firstSeparateRowIndex)
                         {
@@ -64,43 +63,39 @@ namespace CheckersGameLogic
                             currentCheckerPiece = new Checker(this.r_FirstPlayer, eCheckerType.Regular, currentCellPosition);
                             r_FirstPlayer.AddPieceToPlayerListOfPieces(currentCheckerPiece);
                         }
-
                     }
 
                     this.r_Board[rowIndex, columnIndex] = new BoardPosition(currentCellPosition, currentCheckerPiece);
                 }
-
             }
-
         }
 
-        private bool isAlternatingCell(int i_RowIndex, int i_ColumnIndex)
+        private bool isCheckerCell(int i_RowIndex, int i_ColumnIndex)
         {
             return (i_RowIndex % 2 == 0 && i_ColumnIndex % 2 != 0) || (i_RowIndex % 2 != 0 && i_ColumnIndex % 2 == 0);
         }
 
         public void EndGame()
         {
-            if (this.OpponentPlayer.IsPiecesListEmpty() || isOpponentBlocked())
+            if (this.OpponentPlayer.IsPiecesListEmpty() || isOpponentUnableToMove())
             {
-                this.m_WinnerPlayer = this.CurrentPlayer;
-                this.m_WinnerPlayer.Score += calculateScoresToAdd();
+                this.m_Winner = this.CurrentPlayer;
+                this.m_Winner.Score += calculateScoreToAdd();
             }
             else if (!this.IsGameFinished)
             {
                 this.m_LastPlayer = this.CurrentPlayer;
-                this.m_WinnerPlayer = this.OpponentPlayer;
-                this.OpponentPlayer.Score += calculateScoresToAdd();
-                this.m_IsGameFinished = true;
+                this.m_Winner = this.OpponentPlayer;
+                this.OpponentPlayer.Score += calculateScoreToAdd();
+                this.m_IsGameOver = true;
             }
             else
             {
-                this.m_WinnerPlayer = null;
+                this.m_Winner = null;
             }
-
         }
 
-        private bool isOpponentBlocked()
+        private bool isOpponentUnableToMove()
         {
             return !this.CurrentPlayer.IsPossibleMovesListEmpty() && this.OpponentPlayer.IsPossibleMovesListEmpty();
         }
@@ -111,13 +106,13 @@ namespace CheckersGameLogic
             initializeBoard();
         }
 
-        private int calculateScoresToAdd()
+        private int calculateScoreToAdd()
         {
             return Math.Abs((this.CurrentPlayer.RegularPiecesCounter + (this.CurrentPlayer.KingsCounter * k_KingScore))
                           - (this.OpponentPlayer.RegularPiecesCounter + (this.OpponentPlayer.KingsCounter * k_KingScore)));
         }
 
-        public Move ActivateComputerMove()
+        public Move ExecuteComputerMove()
         {
             Random randomObject = new Random();
             int randomMoveIndex;
@@ -168,14 +163,14 @@ namespace CheckersGameLogic
 
             this.r_Board[endPositionRowIndex, endPositionColumnIndex].CurrentCheckerPiece = this.r_Board[startPositionRowIndex, startPositionColumnIndex].CurrentCheckerPiece;
             this.r_Board[startPositionRowIndex, startPositionColumnIndex].Clear();
-            checkIfShouldChangePieceState(this.r_Board[endPositionRowIndex, endPositionColumnIndex].CurrentCheckerPiece);
+            updatePieceStateIfNeeded(this.r_Board[endPositionRowIndex, endPositionColumnIndex].CurrentCheckerPiece);
 
             if (i_PlayerMove.ShouldCapture)
             {
                 capturePiece(i_PlayerMove);
             }
 
-            checkIfGameEnds(i_PlayerMove);
+            checkIfGameOver(i_PlayerMove);
             this.m_LastPlayer = this.CurrentPlayer;
 
             if (!i_PlayerMove.ShouldCapture || this.CurrentPlayer.IsCaptureMovesListEmpty())
@@ -184,22 +179,22 @@ namespace CheckersGameLogic
             }
         }
 
-        private bool checkIfGameEnds(Move i_LastMove)
+        private bool checkIfGameOver(Move i_LastMove)
         {
-            updatePlayersPossibleAndCaptureMovesLists(i_LastMove);
-            this.m_IsGameFinished = this.OpponentPlayer.IsPiecesListEmpty() ||
+            updatePlayerMovesLists(i_LastMove);
+            this.m_IsGameOver = this.OpponentPlayer.IsPiecesListEmpty() ||
                                     (this.OpponentPlayer.IsPossibleMovesListEmpty() && this.OpponentPlayer.IsCaptureMovesListEmpty());
-            if (m_IsGameFinished)
+            if (m_IsGameOver)
             {
                 this.EndGame();
             }
 
-            return this.m_IsGameFinished;
+            return this.m_IsGameOver;
         }
 
-        private void updatePlayersPossibleAndCaptureMovesLists(Move i_LastMove)
+        private void updatePlayerMovesLists(Move i_LastMove)
         {
-            foreach (Player player in this.r_PlayersReferencesArray)
+            foreach (Player player in this.r_PlayerReferences)
             {
                 player.ClearPossibleMovesList();
                 player.ClearCaptureMovesList();
@@ -340,7 +335,7 @@ namespace CheckersGameLogic
             return new Position(i_StartPosition.RowPositionOnBoard + 1 + i_Offset, i_StartPosition.ColumnPositionOnBoard + 1 + i_Offset);
         }
 
-        private void checkIfShouldChangePieceState(Checker i_CheckerPiece)
+        private void updatePieceStateIfNeeded(Checker i_CheckerPiece)
         {
             if (i_CheckerPiece.PieceType != eCheckerType.King)
             {
@@ -356,7 +351,6 @@ namespace CheckersGameLogic
                 }
             }
         }
-
 
         private bool isInBounds(Move i_PlayerMove)
         {
@@ -488,7 +482,7 @@ namespace CheckersGameLogic
         {
             get
             {
-                return this.r_PlayersReferencesArray[(int)this.m_PlayerTurn];
+                return this.r_PlayerReferences[(int)this.m_PlayerTurn];
             }
         }
 
@@ -496,7 +490,7 @@ namespace CheckersGameLogic
         {
             get
             {
-                return this.r_PlayersReferencesArray[(int)this.m_PlayerTurn ^ 1];
+                return this.r_PlayerReferences[(int)this.m_PlayerTurn ^ 1];
             }
         }
 
@@ -504,11 +498,11 @@ namespace CheckersGameLogic
         {
             get
             {
-                return this.m_WinnerPlayer;
+                return this.m_Winner;
             }
             set
             {
-                this.m_WinnerPlayer = value;
+                this.m_Winner = value;
             }
         }
 
@@ -528,11 +522,11 @@ namespace CheckersGameLogic
         {
             get
             {
-                return this.m_IsGameFinished;
+                return this.m_IsGameOver;
             }
             set
             {
-                this.m_IsGameFinished = value;
+                this.m_IsGameOver = value;
             }
         }
     }
