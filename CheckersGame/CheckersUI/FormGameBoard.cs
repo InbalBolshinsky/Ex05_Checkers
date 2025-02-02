@@ -472,7 +472,6 @@ namespace CheckersUI
             computerMoveTimer.Start();
         }
 
-
         private void handleGameEnd()
         {
             string message;
